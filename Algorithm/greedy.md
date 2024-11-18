@@ -91,6 +91,84 @@ int main()
 }
 ```
 
+</br>
+
+## 最大不相交区间数量
+
+</br>
+
+<p>两个问题的做法是完全一样的，也是先按照右端点排序，再枚举每一个区间，如果当前区间有点则pass，没有点则选择该区间的左端点，那么选择的点的数量就是我们最大的不相交区间数量</p>
+
+<p>证明 ans = cnt</p>
+
+1. ans >= cnt ：第一个点一定严格在 x1 的右端点，第二个点一定严格在 x2 的右端点，以此类推，按照这种方式的解 cnt 一定是一种可行的方案，得证。
+
+![35373ad75ab31822b84611698fdd81c3](https://github.com/user-attachments/assets/fd62fa90-795b-4808-90f2-4a3e10228f60)
+
+2. ans <= cnt 反证法：假设 ans > cnt ，意味着可以选出比 cnt 更多个不相交的区间，但 cnt 个点已经把区间包含了，每个区间都至少包含一个点。但如果有大于 cnt 的解，那么我们至少就要选出来 cnt + 1 （即 ans ）个点来覆盖掉区间，这与实际情况不符，因为 只需要 cnt 就够了，矛盾构成
+
+3. ans = cnt
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 100010;
+
+int n;
+
+struct Range
+{
+    int l, r;
+    bool operator< (const Range &w) const
+    {
+        return r < w.r;
+    }
+} range[N];
+
+int main()
+{
+    scanf("%d", &n);
+    for(int i = 0; i < n; i++)
+    {
+        int l, r;
+        scanf("%d%d", &l, &r);
+        range[i] = {l, r};
+    }
+
+    sort(range, range + n);
+
+//y总的答案
+    int ans = 0;
+    int end = -2e9;
+    for(int i = 0; i < n; i++)
+    {
+        if(end < range[i].l)
+        {
+            ans ++;
+            end = range[i].r;
+        }
+    }
+
+//我的答案，感觉我的才对
+    int ans = 0;
+    int end = range[0].r;
+    for(int i = 1; i < n; i++)
+    {
+        if(end < range[i].l)
+        {
+            ans ++;
+            end = range[i].r;
+        }
+    }
+
+    printf("%d", ans);
+    return 0;
+}
+```
+
 
 
 
