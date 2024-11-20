@@ -169,6 +169,81 @@ int main()
 }
 ```
 
+</br>
+
+## 区间分组
+
+</br>
+
+<p>贪心思路：</p>
+
+1. 将所有区间按左端点从小到大排序
+2. 枚举每个区间，判断能否将其放到某个现有的区间 (L[i] > Max_r 放不进)
+- 不存在这样的组，开一个新的组，放入该区间
+- 存在这样的组，放进组内，并更新该组的 Max_r
+
+<p>证明：</p>
+
+1. ans <= cnt:一定是一个合法的方案，因为这样来看，所有组内的区间都没有交集。
+2. ans >= cnt:假设一共有 cnt 个组，当开最后一个组（第 cnt 个组）的时候，枚举到第 i 个区间的时候，发现与前面的组中的区间都有交集。有交集的含义：Max_r 是当前组右端点的最大值，有Max_r >= L[i]，在有一个点是，枚举区间的时候是按照左端点从小到大枚举的，第 i 个区间在前面所有区间之后才加进去，所有所有区间的左端点一定小于等于 L[i] ，左端点小于等于 L[i] ，右端点大于等于 L[i]，故有交集。同理对于前面的 cnt - 1 个组都能找到这样的区间使 L[i] 在区间上面。<b>算上当前的第 i 个区间，一共找到 cnt 个区间有公共点即 L[i] ，整个区间交集不为空，因此不管怎么分，所有合法方案，这 cnt 个区间一定不会被分到一组里面（每一个区间都要在一个单独的组里面），所以 ans >= cnt </b>
+
+<p>判断是否有组满足 Max_r < L[i] ，可以用小根堆来做，如果所有组的 Max_r 的最小值满足条件，那就找到了这样的组。</p>
+
+<p><b>动态的维护最小值可以用堆来做，时间还小</b></p>
+
+```
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+const int N = 100010;
+
+int n;
+struct Range
+{
+    int l, r;
+    bool operator< (const Range &w) const
+    {
+        return l < w.l;
+    }
+} range[N];
+
+int main()
+{
+    scanf("%d", &n);
+    for(int i = 0; i < n; i++)
+    {
+        int l, r;
+        scanf("%d%d", &l, &r);
+        range[i] = {l, r};
+    }
+
+    sort(range, range + n);
+
+    priority_queue<int, vector<int>, greater<int>> heap;
+    for(int i = 0; i < n; i++)
+    {
+        auto r = range[i];
+        if(heap.empty() || heap.top() >= r.l) heap.push(r.r);
+        else
+        {
+            int t = heap.top();
+            heap.pop();
+            heap.push(r.r);
+        }
+    }
+    printf("%d\n", heap.size());
+    return 0;
+}
+```
+
+
+
+
+
 
 
 
