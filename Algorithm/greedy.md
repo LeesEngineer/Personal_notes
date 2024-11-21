@@ -240,6 +240,104 @@ int main()
 }
 ```
 
+</br>
+
+## 区间覆盖
+
+</br>
+
+<p>贪心思路：</p>
+
+1. 将所有区间按照左端点从小到大排序。
+2. 从前往后 枚举区间，在所有能覆盖 start 的区间当中，选择一个右端点最大的区间，更新 start 为该区间的右端点。
+
+<p>证明（先不考虑无解）：</p>
+
+1. ans <= cnt : 为一种可行方案，故成立。
+
+2. ans >= cnt : 从前往后找第一个不一样的区间。假设是第 i 个区间，按照我们的算法，cnt 组的该区间的右端点一定不在 ans 组该区间右端点的左侧，所以可以把 ans 的 i 区间替换为我们 cnt 的 i 区间，对于 ans 组替换前 i + 1 区间的左端点一定在 i 区间右端点的左侧，替换后更是如此。每一步替换法不会增加解的值，以此类推，跳出这道题，单看这个逻辑，可能会在 cnt 还没有枚举完时 ans 以枚举完并且覆盖了整个区间，故有 ans >= cnt 。我们可以把任何一个解调整成我们当前的方案（包括最优解），得证
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 100010;
+
+int n;
+struct Range
+{
+    int l, r;
+    bool operator< (const Range &w) const
+    {
+        return l < w.l;
+    }
+} range[N];
+
+int main()
+{
+    int st, ed;
+    scanf("%d%d", &st, &ed);
+    scanf("%d", &n);
+    for(int i = 0; i < n; i++)
+    {
+        int l, r;
+        scanf("%d%d", &l, &r);
+        range[i] = {l, r};
+    }
+
+    sort(range, range + n);
+
+    int res = 0;
+    bool success = false;
+    for(int i = 0; i < n; i++)
+    {
+        int j = i; //双指针算法
+        int r = -2e9;
+        while(j < n && range[j].l <= st)
+        {
+            r = max(r, range[j].r);
+            j++;
+        } //枚举所有左端点在 start 左边的区间的右端点的最大值是多少
+
+        if(r < st)
+        {
+            res = -1;
+            break;
+        }
+
+        res ++;
+        
+        if(r >= ed)
+        {
+            success = true;
+            break;
+        }
+
+        i = j - 1;
+        st = r;
+    }
+
+    if(!success) res = -1;
+    printf("%d", res);
+
+    return 0;
+}
+```
+
+</br>
+
+# Huffman Tree
+
+</br>
+
+</br>
+
+## 合并果子
+
+</br>
+
 
 
 
