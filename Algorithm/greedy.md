@@ -338,8 +338,119 @@ int main()
 
 </br>
 
+![cd3712bb99807f6bbfc2ba0a45445372](https://github.com/user-attachments/assets/37369872-0a07-46da-9159-3b87afab3950)
 
+![834904de995c50273970ad9bdd8f410f](https://github.com/user-attachments/assets/2c18463d-d8e5-4aad-b4f4-5c3732e1e5e4)
 
+<p>经典的哈夫曼树，一个完全二叉树，叶子结点是我们要合并的数，内部节点是合并过的数<p>
+
+![24465a6731df27e173e6160b98288076](https://github.com/user-attachments/assets/3dcfe57d-6111-4020-af29-fb3fae1469cb)
+
+<p>消耗的总和是: a+b + c+d + a+b+c+d + e+f + a+b+c+d+e+f</p>
+
+<p>a 会被算三次，这个是和他的路径长度相关的: 3a + 3b + 3c + 3d + 2e + 2f，我们要在所有的完全二叉树里面挑一个权值最小的树</p>
+
+<p>贪心思路：每一次挑出来最小的两堆来合并</p>
+
+<p>证明：</p>
+
+1. 最小的两个数，深度一定最深，而且可以互为兄弟：意味着我们可以在第一步把它们合并，且合并两个最小点一定可以得到最优解
+-（反证法）假设最小的两个点一个是 a 一个是 f ，那么一定可以把 b 和 f 交换，总和一定变小，交换前 2f + 3b 交换后 3f + 2b 权值一定变小。
+- 如上图，abcd 是最小的一共有三种组合情况都是可以的 ab ac ad，因为整个权值是与深度有关系的，如果在同一层深度不变，那么权值也不变。
+
+2. 如果一直贪心式的合并能否得到全局最优解，第一步贪心是对的，但在第一步贪心的基础上再贪心还是对的吗。如果有 n 个果子，第一步贪心之后有 n - 1 个果子，对于 n - 1 的这颗树，一定是挑最小的两个点来合并，对于 n - 1 来说是最优解，但<b>n - 1 的最优解不一定是 n 的最优解（不证明了）。</b>证明贪心思路：先来看 n 的情况，假设为 n 个点的原始问题，ab 为最小的点，先来合并 ab 一定是可以得到最优解的，<b>前面证明了，合并最小的两个点一定可以得到最优解</b>，得到了新哈夫曼树 n - 1。把 n - 1 树合并的最小值定为 f(n-1)，则 f(n) = f(n-1) + a + b。所有合并树的第一步都是合并最小的两个点，得到解
+
+<p>每次求最小解都可以用堆来做</p>
+
+```
+#include <iostream>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+int main()
+{
+    int n;
+    scanf("%d", &n);
+    
+    priority_queue<int, vector<int>, greater<int>> heap;
+    while(n --)
+    {
+        int x;
+        scanf("%d", &x);
+        heap.push(x);
+    }
+    
+    int res = 0;
+    while(heap.size() > 1) //对于一颗树，合并次数一定是 n - 1，也可以用 for 来实现
+    {
+        int a = heap.top(); heap.pop();
+        int b = heap.top(); heap.pop();
+        res += a + b;
+        heap.push(a + b);
+    }
+    
+    printf("%d", res);
+    return 0;
+}
+```
+
+</br>
+
+# 排序不等式
+
+</br>
+
+## 排队打水
+
+</br>
+
+<p>人数 3 6 1 4 2 5 7 </p>
+
+<p>等待总时间 3*6 6*5 1*4 4*3 2*2 5*1 </p>
+
+<p>总时间 = t1*(n-1) + t2*(n-2) + ... + t(n-1)*1</p>
+
+<p>把乘的数看作是权重，让大数值乘以小权重</p>
+
+<p>按照从小到大的顺序排序，总时间最小</p>
+
+<p>证明：（调整法）假设最优解不是从小到大排好序的，必然存在两个相邻的元素，前一个比后一个大，ti > t(i+1) 此时交换一下二者位置，<b>交换前后对其他元素不会产生影响</b>，之后影响二者的时间</p>
+
+`前为：ti * (n-i) + t(i+1) * (n-i-1)`
+
+`后为：t(i+1) * (n-i) + ti * (n-i-1)`
+
+<p>交换后总时间降低</p>
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+typedef long long LL;
+
+const int N = 100010;
+
+int n;
+int t[N];
+
+int main()
+{
+    scanf("%d", &n);
+    for(int i = 0; i < n; i++) scanf("%d", &t[i]);
+    
+    sort(t, t + n);
+    
+    LL res = 0;
+    for(int i = 0; i < n; i ++) res += t[i] * (n - i - 1);
+    
+    printf("%lld", res); //注意这里！！！
+    return 0;
+}
+```
 
 
 
