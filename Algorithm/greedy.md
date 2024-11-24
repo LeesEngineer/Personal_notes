@@ -452,6 +452,57 @@ int main()
 }
 ```
 
+</br>
+
+# 绝对值不等式
+
+</br>
+
+## 货仓选址
+
+</br>
+
+`f(x) = |x1 - x| + |x2 - x| + ... + |xn - x|`
+
+<p>求其最小值：猜是中位数</p>
+
+<p>用分组的概念，第一组和第 n 组，第二组和第 n - 1 组，以此类推</p>
+
+```
+f(x) = (|x1 - x| + |xn - x|) + (|x2 - x| + |x(n-1) - x|) + ......
+     >= xn - x1 + x(n-1) - x2 + ...... 
+````
+
+<p>对每一个单独的一项要取到等号，要求 x 在 xi 和 x(n-i+1) 之间。所以要取整体的最小值，要取 x 为整个序列的中位数或两个相等的中位数之间。此时取到等号。</p>
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 100010;
+
+int n;
+int a[N];
+
+int main()
+{
+    scanf("%d", &n);
+    for(int i = 0; i < n; i++) scanf("%d", &a[i]);
+    
+    sort(a, a + n);
+    
+    int res = 0;
+    for(int i = 0; i < n; i++) res += abs(a[i] - a[n/2]);
+    
+    printf("%d", res);
+    return 0;
+}
+```
+
+
+
 
 
 
