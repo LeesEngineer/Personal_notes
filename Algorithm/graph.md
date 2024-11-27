@@ -101,7 +101,7 @@ void dfs(int u)
         if(!col[i] && !dg[u + i] && !udg[n - u + i])
         {
             g[u][i] = 'Q';
-            col[i] = dg[u + i] = udg[n - u + i] = true;
+            col[i] = dg[u + i] = udg[n - u + i] = true; //反对角线和正对角线 
             dfs(u + 1);
             col[i] = dg[u + i] = udg[n - u + i] = false;
             g[u][i] = '.';
