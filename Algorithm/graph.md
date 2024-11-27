@@ -69,6 +69,60 @@ int main()
 
 </br>
 
+## N皇后
+
+</br>
+
+<p>有很多种搜索顺序</p>
+
+<p>第一种搜索树和全排列的搜索树是一样的，一定要注意剪枝（提前判断当前这个方案一定是不合法的，下面的那个子树就没有必要继续往下搜了，直接回溯）</p>
+
+```
+#include <iostream>
+
+using namespace std;
+
+const int N = 20;
+
+int n;
+char g[N][N];
+bool col[N], dg[N], udg[N]; //列和正负对角线
+
+void dfs(int u)
+{
+    if(u == n)
+    {
+        for(int i = 0; i < n; i++) puts(g[i]);
+        puts("");
+        return;
+    }
+    
+    for(int i = 0; i < n; i++)
+        if(!col[i] && !dg[u + i] && !udg[n - u + i])
+        {
+            g[u][i] = 'Q';
+            col[i] = dg[u + i] = udg[n - u + i] = true;
+            dfs(u + 1);
+            col[i] = dg[u + i] = udg[n - u + i] = false;
+            g[u][i] = '.';
+        }
+}
+
+int main()
+{
+    cin >> n;
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            g[i][j] = '.';
+            
+    dfs(0);
+    
+    return 0;
+}
+```
+
+</br>
+
 # BFS
 
 </br>
