@@ -101,7 +101,7 @@ void dfs(int u)
         if(!col[i] && !dg[u + i] && !udg[n - u + i])
         {
             g[u][i] = 'Q';
-            col[i] = dg[u + i] = udg[n - u + i] = true; //反对角线和正对角线 
+            col[i] = dg[u + i] = udg[n - u + i] = true; //反对角线和正对角线，截距。
             dfs(u + 1);
             col[i] = dg[u + i] = udg[n - u + i] = false;
             g[u][i] = '.';
@@ -120,6 +120,10 @@ int main()
     return 0;
 }
 ```
+
+<p>可以以一种更原始的方式来枚举八皇后问题</p>
+
+<p>比如枚举第一个格子，放产生一个分支，不放产生一个分支</p>
 
 </br>
 
