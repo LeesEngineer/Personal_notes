@@ -203,7 +203,7 @@ int bfs()
             if(x >= 0 && x < n && y >= 0 && y < m && g[x][y] == 0 && d[x][y] == -1)
             {
                 d[x][y] = d[t.first][t.second] + 1;
-                Prev[x][y] = t;
+                //Prev[x][y] = t;
                 q[ ++ tt] = {x, y};
             }
         }
@@ -256,7 +256,7 @@ int main()
 
 </br>
 
-## 树与图的深度优先遍历--树的重心
+# 树与图的遍历
 
 </br>
 
@@ -267,13 +267,63 @@ int main()
 
 using namespace std;
 
-const int N = 100010, M = N * 2;
+const int N = 100010, M = N * 2; //对于树来说 M = N * 2
 
-int h[N]; //头指针列表
-int e[M]; //存每一个节点的值
-int ne[M]; //存的是每个节点的 next 值是多少
+int h[N];
+int e[M];
+int ne[M];
 int idx;
 
+void add(int a, int b) //头插法
+{
+    e[idx] = b;
+    ne[idx] = h[a];
+    h[a] = idx ++;
+}
+
+bool st[N];//每个点只能遍历一次
+
+void dfs(int u)
+{
+    st[u] = true;
+
+    for(int i = h[u]; i != -1; i = ne[i])
+    {
+        int j = e[i];
+        if(!st[j]) dfs(j);
+    }
+}
+
+int main()
+{
+    memset(h, -1, sizeof h);
+
+    dfs(1); //假设从1开始搜
+}
+```
+
+</br>
+
+## 邻接表的存储
+
+</br>
+
+```
+const int N = 100010, M = N * 2; //对于树来说 M = N * 2
+
+int h[N];
+int e[M];
+int ne[M];
+int idx;
+```
+
+</br>
+
+## 头插法
+
+</br>
+
+```
 void add(int a, int b) //头插法
 {
     e[idx] = b;
@@ -287,7 +337,45 @@ int main()
 }
 ```
 
+</br>
 
+## 遍历
+
+</br>
+
+### 深度优先遍历
+
+</br>
+
+```
+bool st[N];//每个点只能遍历一次
+
+void dfs(int u)
+{
+    st[u] = true;
+
+    for(int i = h[u]; i != -1; i = ne[i])
+    {
+        int j = e[i];
+        if(!st[j]) dfs(j);
+    }
+}
+```
+
+### 树的重心
+
+</br>
+
+### 宽度优先遍历
+
+</br>
+
+```
+
+```
+
+
+ 
 
 
 
