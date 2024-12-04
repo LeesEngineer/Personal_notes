@@ -261,7 +261,30 @@ int main()
 </br>
 
 ```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
 
+using namespace std;
+
+const int N = 100010, M = N * 2;
+
+int h[N]; //头指针列表
+int e[M]; //存每一个节点的值
+int ne[M]; //存的是每个节点的 next 值是多少
+int idx;
+
+void add(int a, int b) //头插法
+{
+    e[idx] = b;
+    ne[idx] = h[a];
+    h[a] = idx ++;
+}
+
+int main()
+{
+    memset(h, -1, sizeof h);
+}
 ```
 
 
