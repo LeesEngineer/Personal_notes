@@ -231,7 +231,7 @@ int main()
 
 </br>
 
-# 树和图的优先遍历 
+# 树和图的遍历 
 
 </br>
 
@@ -244,55 +244,7 @@ int main()
 1. 邻接矩阵；g[a][b] 就存储 a 到 b 这条边的有效信息，有权重的话就是权重，无法存储重边，用的比较少，比较浪费空间，适合存储稠密图，稀疏图不适合
 2. 邻接表；如果我们有 n 个点的话，就在每一个节点上开了一个单链表，每个单链表就是存储这个点可以走到哪个点，在单链表中插入一般是在头的位置插，原为 h[2] -> 1 -> 4 -> null，插入 2 -> 3； h[2] -> 3 -> 1 -> 4 -> null
 
-</br>
-
-# 树与图的遍历
-
-</br>
-
 <p>无论是深度优先还是宽度优先，时间复杂度都是 O(n+m) 与点和边城线性关系</p>
-
-```
-#include <iostream>
-#include <algorithm>
-#include <cstring>
-
-using namespace std;
-
-const int N = 100010, M = N * 2; //对于树来说 M = N * 2
-
-int h[N];
-int e[M];
-int ne[M];
-int idx;
-
-void add(int a, int b) //头插法
-{
-    e[idx] = b;
-    ne[idx] = h[a];
-    h[a] = idx ++;
-}
-
-bool st[N];//每个点只能遍历一次
-
-void dfs(int u)
-{
-    st[u] = true;
-
-    for(int i = h[u]; i != -1; i = ne[i])
-    {
-        int j = e[i];
-        if(!st[j]) dfs(j);
-    }
-}
-
-int main()
-{
-    memset(h, -1, sizeof h);
-
-    dfs(1); //假设从1开始搜
-}
-```
 
 </br>
 
@@ -329,13 +281,7 @@ int main()
 }
 ```
 
-</br>
-
-## 遍历
-
-</br>
-
-### 深度优先遍历
+## 深度优先遍历
 
 </br>
 
@@ -356,7 +302,7 @@ void dfs(int u)
 
 </br>
 
-#### 树的重心
+### 树的重心
 
 </br>
 
@@ -433,7 +379,7 @@ int main()
 
 </br>
 
-### 宽度优先遍历
+## 宽度优先遍历
 
 </br>
 
@@ -451,7 +397,7 @@ while queue不空
 
 </br>
 
-#### 图中点的层次
+### 图中点的层次
 
 </br>
 
