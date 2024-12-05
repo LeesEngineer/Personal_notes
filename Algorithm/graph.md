@@ -260,6 +260,8 @@ int main()
 
 </br>
 
+<p>无论是深度优先还是宽度优先，时间复杂度都是 O(n+m) 与点和边城线性关系</p>
+
 ```
 #include <iostream>
 #include <algorithm>
@@ -364,17 +366,88 @@ void dfs(int u)
 
 </br>
 
-### 树的重心
+#### 树的重心
 
 </br>
 
 <p>问题在于如何快速的求每一个连通块的点数，可以用深度优先遍历，<b>因为深度优先遍历有一个很好的特点，可以算出每一个子树的大小</b>，在树的深度优先遍历当中可以求出每个子树的点的数量</p>
+
+```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N = 100010, M = N * 2; //对于树来说 M = N * 2
+
+int n;
+int h[N];
+int e[M];
+int ne[M];
+int idx;
+
+int ans = N;
+
+void add(int a, int b) //头插法
+{
+    e[idx] = b;
+    ne[idx] = h[a];
+    h[a] = idx ++;
+}
+
+bool st[N];//每个点只能遍历一次
+
+//返回以u为根的子树的大小
+int dfs(int u)
+{
+    st[u] = true;
+
+    int sum = 1, res = 0;
+    for(int i = h[u]; i != -1; i = ne[i])
+    {
+        int j = e[i];
+        if(!st[j]) 
+        {
+            int s = dfs(j);
+            res = max(res, s);
+            sum += s;  
+        }
+    }
+    
+    res = max(res, n - sum); // n - sum 为总结点数减去以 u 为根的树的节点数
+    
+    ans = min(ans, res);
+    
+    return sum;
+}
+
+int main()
+{
+    memset(h, -1, sizeof h);
+    
+    cin >> n;
+    
+    for(int i = 0; i < n - 1; i ++)
+    {
+        int a, b;
+        cin >> a >> b;
+        add(a, b), add(b, a);
+    }
+
+    dfs(1); //假设从1开始搜
+    
+    cout << ans << endl;
+}
+```
 
 </br>
 
 ### 宽度优先遍历
 
 </br>
+
+<p></p>
 
 ```
 
