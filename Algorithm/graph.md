@@ -139,16 +139,6 @@ int main()
 
 <p>因为搜索时是一层一层往外<b>扩展</b>的，所以他有一个最短路的概念，即如果<b>每一条边权重都是 1 的时候(权重必须一样)，BFS 第一次搜索到的该点时一定是按照最近的路径</b></p>
 
-```
-//伪代码
-
-queue <- 初始化
-
-while queue不空
-  t <- 队头
-  拓展 t
-```
-
 </br>
 
 ## 走迷宫
@@ -447,10 +437,85 @@ int main()
 
 </br>
 
-<p></p>
+```
+//伪代码
+queue <- 初始化
 
+while queue不空
+  t <- 队头
+  拓展 t 所有邻点 a
+  if(为遍历) a
+    queue <- a
+    d[a] = d[t] + 1
 ```
 
+</br>
+
+#### 图中点的层次
+
+</br>
+
+```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N = 100010;
+
+int n, m;
+int h[N], e[N], ne[N], idx;
+int d[N], q[N];
+
+void add(int a, int b)
+{
+    e[idx] = b, ne[idx] = h[a], h[a] = idx ++;
+}
+
+
+int bfs()
+{
+    int hh = 0, tt = 0;
+    q[0] = 1;
+    
+    memset(d, -1, sizeof d);
+    
+    d[1] = 0;
+    
+    while(hh <= tt) //while 队列不空
+    {
+        int t = q[hh ++ ];
+        
+        for(int i = h[t]; i != -1; i = ne[i])
+        {
+            int j = e[i];
+            if(d[j] == -1)
+            {
+                d[j] = d[t] + 1;
+                q[ ++ tt] = j; //数组模拟队列
+            }
+        }
+    }
+    return d[n];
+}
+
+int main()
+{
+    cin >> n >> m;
+    
+    memset(h, -1, sizeof h);
+    for(int i = 0; i < m; i++)
+    {
+        int a, b;
+        cin >> a >> b;
+        add(a, b);
+    }
+    
+    cout << bfs() << endl;
+    
+    return 0;
+}
 ```
 
 
