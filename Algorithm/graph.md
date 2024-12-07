@@ -596,6 +596,16 @@ int main()
 
 <p>常见的最短路问题可以分为两大类：单源最短路，多源汇最短路</p>
 
+<p>图论侧重于抽象和实现而不是原理，故最短路的难点在于建图，如何把原问题抽形成最短路问题，如何定义点和边，来套用模板。</p>
+
+- Dijkstra 算法基于tanxin
+
+- Floyd 算法基于动态规划
+
+- Bellman-Ford 算法基于离散数学的知识
+
+<p>在最短路问题中有重边和自环：如果所有边都是正的，那么自环就不会出现在最短路里面；若有重边只需保留长度最短的点即可</p>
+
 </br>
 
 ## 单源最短路：求一个点到其他所有点的最短距离
@@ -612,9 +622,104 @@ int main()
 
 <p>有两个很经典的算法，其实是一个算法（但不同的场景适合用不同的实现方式）</p>
 
-1. 朴素Dijkstra算法：时间复杂度为 O(n^2)，故适合稠密图，边数比较多的时候
+</br>
 
-2. 堆优化版的Dijkstra算法：时间复杂度为 O(mlogn)
+#### 朴素Dijkstra算法
+
+</br>
+
+<p>朴素Dijkstra算法：时间复杂度为 O(n^2)，故适合稠密图，边数比较多的时候</p>
+
+<p>因为适用于稠密图，所以用邻接矩阵来存储</p>
+
+<p>算法思路：设置一个集合 s 包含当前已经确定最短距离的点</p>
+
+```
+dis[i] = 0, dis[i] = MAX
+for i = 1 to n
+    t <- 不在 s 中的，且距离最近的点
+    s <- t
+    用 t 更新其他所有点的距离（看从 t 出去的所有的边，他组成的路径能不能更新其他点的距离）(+)
+
+
+//每一次迭代都可以确定一个点的最短距离，循环 n 次确定 n 个点的最短距离
+//(+)：比如说 t 可以走到 x，看当前 x 到一号点的距离能不能用 t 到一号点的距离更新，即如果 dis[x] > dis[t] + w，那就更新（贪心）
+```
+
+<b>Dijkstra求最短路_1</b>
+
+```
+/*
+数据范围
+1≤n≤500
+1≤m≤1e5
+为稠密图
+*/
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 510;
+
+int n, m;
+int g[N][N];
+int dist[N];
+bool st[N]; //确定最小值是否已经确定
+
+int dijkstra()
+{
+    memset(dist, 0x3f, sizeof dist);
+    dist[1] = 0;
+    
+    for(int i = 0; i < n; i ++ )
+    {
+        int t = -1;
+        for(int j = 1; j <= n; j ++ )
+            if(!st[j] && (t == -1 || dist[t] > dist[j]))
+                t = j;
+
+        if(t == n) break; //优化
+                
+        st[t] = true;
+        
+        for(int j = 1; j <= n; j ++ )
+            dist[j] = min(dist[j], dist[t] + g[t][j]);
+    }
+    
+    if(dist[n] == 0x3f3f3f3f) return -1;
+    return dist[n];
+}
+
+int main()
+{
+    scanf("%d%d", &n, &m);
+    
+    memset(g, 0x3f, sizeof g);
+    
+    while(m -- )
+    {
+        int a, b, c;
+        scanf("%d%d%d", &a, &b, &c);
+        g[a][b] = min(g[a][b], c);
+    }
+    
+    int t = dijkstra();
+    
+    printf("%d\n", t);
+    
+    return 0;
+}
+```
+
+</br>
+
+#### 堆优化版的算法
+
+</br>
+
+<p>堆优化版的Dijkstra算法：时间复杂度为 O(mlogn)</p>
 
 </br>
 
@@ -639,8 +744,6 @@ int main()
 </br>
 
 <p>只有一个经典的 Floyd 算法，O(n^3) </p>
-
-
 
 
 
