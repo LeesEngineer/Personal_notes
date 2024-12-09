@@ -802,7 +802,7 @@ int dijkstra()
         int ver = t.second, distance = t.first;
         if(st[ver]) continue;
 
-        st[ver] = true;
+        st[ver] = true; //不加的话，只会影响时间，不会影响结果
         
         for(int i = h[ver]; i != -1; i = ne[i])
         {
