@@ -339,7 +339,8 @@ int dfs(int u)
 {
     st[u] = true;
 
-    int sum = 1, res = 0;
+    int sum = 1;
+    int res = 0; //每一个连通块大小的最大值
     for(int i = h[u]; i != -1; i = ne[i])
     {
         int j = e[i];
@@ -347,7 +348,7 @@ int dfs(int u)
         {
             int s = dfs(j);
             res = max(res, s);
-            sum += s;  
+            sum += s;
         }
     }
     
@@ -856,6 +857,110 @@ int main()
 <p> SPFA 只是 Bellman-Ford 的优化，但不是所有情况都可以用</p>
 
 <p>比如想求不超过 k 条边的最短路，对边数做限制，只能用Bellman-Ford</p>
+
+</br>
+
+#### Bellman-Ford
+
+</br>
+
+<p>Bellman-Ford 存边的方式可以随便存，只要能遍历所有的边，故这里边的存储方式不一定要写成邻接表，可以就定义一个结构体</p>
+
+```
+for n 次
+    for 所有边 a, b, w //表示从 a 走到 b 的边，权重为 w
+        dist[b] = min(dist[b], dist[a] + w) //这个更新的操作叫做松弛操作
+```
+
+<p>所有边一定满足，dist[b] <= dist[a] + w（三角不等式）</p>
+
+<p>求最短路的时候如果有负权回路的话，最短路就不一定存在</p>
+
+![40ee03ab9d280fa1484c9dd9aad42acf](https://github.com/user-attachments/assets/f6d57106-aaa4-44f1-9cb7-b111ecbd5b01)
+
+<p>如上，从 1 走到 2，从 2 开始转一圈长度就会减一，若转无穷多圈，那么距离就会是负无穷。<b>所以如果能求出最短路，那么一般不存在负权回路</b></p>
+
+<p>存在负权回路，可能没有最短路径</p>
+
+<p><b>Bellman-Ford 可以求出是否存在负权回路的</b>，第一行的迭代是有实际意义的，比方说当前迭代了 k 次，迭代了 k 次的 dist 数组含义是：从一号点经过不超过 k 条边走到每个点的最短距离。所以当第 n 次迭代又更新了某些边的话，那么就说明存在一条边数为 n 的最短路径<b>一条路径上有 n 条边意味着，有 n+1 个点，1 到 n 总共有 n 个点，抽屉原理得一共有两个点编号一样，那么一定存在环，存在环一定是更新了之后，那么一定是负环</b></p>
+
+<p>但一般找负环不用 Bellman—Ford 算法，而是用 SPFA 算法，因为时间较高</p>
+
+<p>SPFA 在各方面都好于 bf 算法，但有些题只能用 bf</p>
+
+</br>
+
+<b>有边数限制的最短路径</b>
+
+</br>
+
+```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N = 510, M = 10010;
+
+int n, m, k;
+int dist[N], backup[N];
+
+struct Edge
+{
+    int a, b, w;
+}edges[M];
+
+int bellman_ford()
+{
+    memset(dist, 0x3f, sizeof dist);
+    dist[1] = 0;
+    
+    for(int i = 0; i < k; i ++ )
+    {
+        memcpy(backup, dist, sizeof dist); //备份 dist 数组
+        for(int j = 0; j < m; j ++ )
+        {
+            int a = edges[j].a, b = edges[j].b, w = edges[j].w;
+            dist[b] = min(dist[b], backup[a] + w);
+        }
+    }
+    
+    if(dist[n] > 0x3f3f3f3f / 2) return -1;//一个正无穷可以更新另一个正无穷，n 可能到不了，但他不是正无穷
+    return dist[n];
+}
+
+int main()
+{
+    scanf("%d%d%d", &n, &m, &k);
+    
+    for(int i = 0; i < m; i ++ )
+    {
+        int a, b, w;
+        scanf("%d%d%d", &a, &b, &w);
+        edges[i] = {a, b, w};
+    }
+    
+    int t = bellman_ford();
+    if(t == -1 && dist[n] != -1) puts("impossible"); //dist[n] != -1 是数据加强，因为最短路径可能就是 -1
+    else printf("%d\n", t);
+    
+    return 0;
+}
+```
+
+<p>要备份 dist 数组，否则枚举边的时候可能会出现串联，先更新了 b 点，再用 b 更新了其他点，其他点又更新了其他点，发生了串联，就不能保证前面的限制了，如下例</p>
+
+```
+三条边
+1 2 1
+1 3 3
+2 3 1
+```
+
+<p>如果不加备份，dist 数组最开始，dist[1] = 0, dist[2] = ∞, dist[3] = ∞，最先枚举 1 到 2 这条边，把 dist[2] 更新为 1，再枚举 2 到 3 这条边，因为 2 的距离发生了变化，那么 dist[3] 就会变成 2</p>
+
+<p>要想不发生串联，就要用上一次迭代的结果</p>
 
 </br>
 
