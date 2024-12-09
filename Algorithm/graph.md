@@ -964,6 +964,224 @@ int main()
 
 </br>
 
+#### SPFA
+
+</br>
+
+<b>很推荐 spfa，正权图也可以过，被卡了就换</b>
+
+<p>SPFA 算是单元最短路中限制最小的了，只要没有负环就可以用 SPFA（99%的最短路问题没有负环）</p>
+
+<p>bellman-ford 是遍历所有边来更新，每一次迭代不是所有 dist 都会被更新，SPFA 就是对这个做优化</p>
+
+<p>dist[b] 在当前迭代想变小的话，一定是 dist[a] 变小了</p>
+
+<p>这里用宽搜来做优化，迭代的时候用一个队列来做（其实用什么都可以，队列，优先队列，堆），队列里面存的是所有变小的节点，用它来更新所有后面的后继</p>
+
+<p>我更新过谁，再拿他来更新别人</p>
+
+```
+queue <- 1
+while queue 不空
+    t <- q.top
+    q.pop()
+    更新 t 的所有出边 t -w-> b
+        if(更新成功) queue <- b，如果已经有 b 那么不用重复加入
+```
+
+<b>和 Dijkstra 特别像</b>
+
+</br>
+
+<b>求最短路</b>
+
+</br>
+
+```
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+typedef pair<int, int> PII;
+
+const int N = 100010;
+
+int n, m;
+int h[N], w[N], e[N], ne[N], idx;
+int dist[N];
+bool st[N];
+
+void add(int a, int b, int c)
+{
+    e[idx] = b, w[idx] = c, ne[idx] = h[a], h[a] = idx ++ ;
+}
+
+int spfa()
+{
+    memset(dist, 0x3f, sizeof dist);
+    dist[1] = 0;
+    
+    queue<int> q;
+    q.push(1);
+    st[1] = true; //存的是当前的点是否在队列当中
+    
+    while(q.size())
+    {
+        int t = q.front();
+        q.pop();
+        
+        st[t] = false;
+        
+        for(int i = h[t]; i != -1; i = ne[i])
+        {
+            int j = e[i];
+            if(dist[j] > dist[t] + w[i])
+            {
+                dist[j] = dist[t] + w[i];
+                if(!st[j])
+                {
+                    q.push(j);
+                    st[j] = true;
+                }
+            }
+        }
+    }
+    
+    if(dist[n] == 0x3f3f3f3f) return -1;
+    return dist[n];
+}
+
+int main()
+{
+    scanf("%d%d", &n, &m);
+    
+    memset(h, -1, sizeof h);
+    
+    while(m -- )
+    {
+        int a, b, c;
+        scanf("%d%d%d", &a, &b, &c);
+        add(a, b, c);
+    }
+    
+    int t = spfa();
+    
+    if(t == -1 && dist[n] != -1) puts("impossible");
+    else printf("%d\n", t);
+    
+    return 0;
+}
+```
+
+<p>也可以用在 Dijkstra，被卡再说，比如说网格图会卡</p>
+
+</br>
+
+<b>求负环</b>
+
+</br>
+
+<p>和bf一样都是利用抽屉原理</p>
+
+<p>在更新 dist[x] 的时候，表示当前 x 到 起点的最短路径的长度。同时记录一下 cnt[x] 表示当前最短路的边数</p>
+
+```
+dist[x] = dist[t] + w[i]
+cnt[x] = cnt[t] + 1 //很容易维护这样一个数组
+```
+
+<p>如果某一次存在 cnt[x] >= n，意味着从 1 到 x 至少经过了 n 条边，n + 1 个点，根据抽屉原理，一定至少有两个点是相同的，即存在一个环</p>
+
+<p>路径上存在一个环，不是白存在的，一定会变小，如果不变小那么就不会存在这个环，所以这个环一定是负权的</p>
+
+<p>一开始不需要初始化了，因为求的不是距离</p>
+
+<p>而且最开始不能直接把一号点加进去了，因为问的是是否存在负环，而不是是否存在从 1 开始的负环，即 1 号点到不了这个负环，把所有点都放进队列即可</p>
+
+```
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+typedef pair<int, int> PII;
+
+const int N = 100010;
+
+int n, m;
+int h[N], w[N], e[N], ne[N], idx;
+int dist[N], cnt[N];
+bool st[N];
+
+void add(int a, int b, int c)
+{
+    e[idx] = b, w[idx] = c, ne[idx] = h[a], h[a] = idx ++ ;
+}
+
+int spfa()
+{
+    queue<int> q;
+    
+    for(int i = 1; i <= n; i ++ )
+    {
+        st[i] = true;
+        q.push(i);
+    }
+    
+    while(q.size())
+    {
+        int t = q.front();
+        q.pop();
+        
+        st[t] = false;
+        
+        for(int i = h[t]; i != -1; i = ne[i])
+        {
+            int j = e[i];
+            if(dist[j] > dist[t] + w[i])
+            {
+                dist[j] = dist[t] + w[i];
+                cnt[j] = cnt[t] + 1;
+                
+                if(cnt[j] >= n) return true;
+                if(!st[j])
+                {
+                    q.push(j);
+                    st[j] = true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+int main()
+{
+    scanf("%d%d", &n, &m);
+    
+    memset(h, -1, sizeof h);
+    
+    while(m -- )
+    {
+        int a, b, c;
+        scanf("%d%d%d", &a, &b, &c);
+        add(a, b, c);
+    }
+    
+    if(spfa()) puts("Yes");
+    else puts("No");
+    
+    return 0;
+}
+```
+
+</br>
+
 ## 多源汇最短路：起点和终点不确定
 
 </br>
