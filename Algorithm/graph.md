@@ -1188,6 +1188,94 @@ int main()
 
 <p>只有一个经典的 Floyd 算法，O(n^3) </p>
 
+<p>原理基于动态规划，能用动态规划解的核心原因是<b>最优子结构性质</b>，状态表示是三维，d[k, i, j] 表示从顶点 i 到顶点 j，只允许经过顶点集合 {1, 2, ..., k} 的最短路径长度。</p>
+
+<p>设当前正在考虑加入的中间点是  k ，状态转移公式为：</p>
+
+`dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])`
+
+<p>解释：</p>
+
+- 如果从 i 到 j 的当前路径不需要经过 k，那么保持 dist[i][j]  不变。
+
+- 如果从 i 到 j 经过 k 会缩短路径长度，那么更新为 dist[i][k] + dist[k][j] 。
+
+<p>初始状态：</p>
+
+- 如果  i = j ，则 dist[i][j] = 0 （自己到自己距离为 0）。
+
+- 如果  i 不等于 j  且  i  和  j  之间有边，设为边的权重  w 。
+
+- 如果  i 不等于 j  且没有直接边连接，设为无穷大（INF）。
+
+```
+初始化 d[i, j]
+for k = 1 to n
+    for i = 1 to n
+        for j = 1 to n
+            d[i, j] = min(d[i, j], d[i, k] + d[k, j]) 
+```
+
+<p>先枚举 k 因为 k 是阶段（第一维没什么用，可以去掉）。算k阶段，从k-1转移过来</p>
+
+`d[k, i, j] = d[k-1, i, k] + d[k-1, k, j] //从 i 到 k 只经过 k-1 个点，`
+
+<p>结束后，d[i, j] 存的就是从 i 到 j 的最短路的长度</p>
+
+```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N = 210, INF = 1e9;
+
+int n, m, Q;
+int d[N][N];
+
+void floyd()
+{
+    for(int k = 1; k <= n; k ++ )
+        for(int i = 1; i <= n; i ++ )
+            for(int j = 1; j <= n; j ++ )
+                d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
+}
+
+int main()
+{
+    scanf("%d%d%d", &n, &m, &Q);
+    
+    for(int i = 1; i <= n; i ++ )
+        for(int j = 1; j <= n; j ++ )
+        {
+            if(i == j) d[i][j] = 0;
+            else d[i][j] = INF;
+        }
+        
+    while(m -- )
+    {
+        int a, b, w;
+        scanf("%d%d%d", &a, &b, &w);
+        
+        d[a][b] = min(d[a][b], w);
+    }
+    
+    floyd();
+    
+    while(Q -- )
+    {
+        int a, b;
+        scanf("%d%d", &a, &b);
+        
+        if(d[a][b] > INF / 2) printf("impossible\n");
+        else printf("%d\n", d[a][b]);
+    }
+    
+    return 0;
+}
+```
+
 
 
 
