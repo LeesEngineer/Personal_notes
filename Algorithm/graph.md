@@ -1306,17 +1306,86 @@ int main()
 
 ```
 dist[i] <- 正无穷
-for i = 0 to n
+for i = 0 to n //这里是迭代 n 次，因为要加入 n 个点
     t <- 集合外距离最近的点
     用 t 来更新其他点到集合的距离 //Dijkstra 是用 t 来更新其他点到起点的距离
     st[t] = true
 ```
 
+<p>其他点到集合的距离：看其他点有没有一条边能连向集合内部（没有则正无穷），某一个点到集合的距离定义成这个点到集合内部的所有边当中的长度最小的那个边</p>
+
+<p>生成树：每一次选中的 t 这个点他的距离对应的那条边就是生成树里的一条边</p>
+
+<p>所有点不连通的时候不存在生成树</p>
+
 <b>Prim 求最小生成树</b>
 
 ```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
 
+using namespace std;
+
+const int N = 510;
+
+int n, m;
+int g[N][N];
+int dist[N];
+bool st[N];
+
+int prim()
+{
+    memset(dist, 0x3f, sizeof dist);
+    
+    int res = 0;
+    for(int i = 0; i < n; i ++ )
+    {
+        int t = -1;
+        for(int j = 1; j <= n; j ++ )
+            if(!st[j] && (t == -1 || dist[t] > dist[j]))
+                t = j;
+                
+        if(i && dist[t] == 0x3f3f3f3f) return 0x3f3f3f3f;
+        if(i) res += dist[t];
+        
+        for(int j = 1; j <= n; j ++ ) dist[j] = min(dist[j], g[t][j]);
+        
+        st[t] = true;
+    }
+    
+    return res;
+}
+
+int main()
+{
+    scanf("%d%d", &n, &m);
+    
+    memset(g, 0x3f, sizeof g);
+    
+    while(m -- )
+    {
+        int a, b, c;
+        scanf("%d%d%d", &a, &b, &c);
+        g[a][b] = g[b][a] = min(g[a][b], c);
+    }
+    
+    int t = prim();
+    
+    if(t == 0x3f3f3f3f) puts("impossible");
+    else printf("%d\n", t);
+    
+    return 0; 
+}
 ```
+
+`if(i && dist[t] == 0x3f3f3f3f) return 0x3f3f3f3f; //如果不是第一个点，且dist为正无穷，说明当前距离最近的点到集合的距离是正无穷`
+
+<p>说明图是不连通的</p>
+
+`if(i) res += dist[t];`
+
+<p>只要不是第一个点，dist[t] 就是当前的点和现在已经连好的生成树里的某一条边的长度</p>
 
 </br>
 
