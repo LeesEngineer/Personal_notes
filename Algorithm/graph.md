@@ -1348,8 +1348,9 @@ int prim()
                 
         if(i && dist[t] == 0x3f3f3f3f) return 0x3f3f3f3f;
         if(i) res += dist[t];
+        //只要不是第一个点，dist[t] 就是当前的点和现在已经连好的生成树里的某一条边的长度
         
-        for(int j = 1; j <= n; j ++ ) dist[j] = min(dist[j], g[t][j]);
+        for(int j = 1; j <= n; j ++ ) if(t != j) dist[j] = min(dist[j], g[t][j]);
         
         st[t] = true;
     }
@@ -1379,13 +1380,38 @@ int main()
 }
 ```
 
-`if(i && dist[t] == 0x3f3f3f3f) return 0x3f3f3f3f; //如果不是第一个点，且dist为正无穷，说明当前距离最近的点到集合的距离是正无穷`
+`if(i && dist[t] == 0x3f3f3f3f) return 0x3f3f3f3f;`
 
-<p>说明图是不连通的</p>
+<p>如果不是第一个点，且dist为正无穷，说明当前距离最近的点到集合的距离是正无穷，即图是不连通的</p>
 
-`if(i) res += dist[t];`
+```
+for(int j = 1; j <= n; j ++ ) if(j != t) dist[j] = min(dist[j], g[t][j]);
+if(i) res += dist[t];
+```
 
-<p>只要不是第一个点，dist[t] 就是当前的点和现在已经连好的生成树里的某一条边的长度</p>
+<p>注意这里，加入条件判断确保不被自环影响，自环不应该加入到最小生成树中</p>
+
+```
+5 10
+1 2 8
+2 2 7
+2 1 1
+3 4 3
+4 4 -10 //这条自环会有影响
+1 3 -9
+5 2 -4
+3 1 0
+1 4 8
+4 4 7
+```
+
+</br>
+
+## 堆优化Prim
+
+</br>
+
+<p>堆优化的思路和 Dijkstra 一样</p>
 
 </br>
 
