@@ -1347,11 +1347,12 @@ int prim()
                 t = j;
                 
         if(i && dist[t] == 0x3f3f3f3f) return 0x3f3f3f3f;
+
         if(i) res += dist[t];
         //只要不是第一个点，dist[t] 就是当前的点和现在已经连好的生成树里的某一条边的长度
         
-        for(int j = 1; j <= n; j ++ ) if(t != j) dist[j] = min(dist[j], g[t][j]);
-        
+        for(int j = 1; j <= n; j ++ ) dist[j] = min(dist[j], g[t][j]);
+
         st[t] = true;
     }
     
@@ -1392,6 +1393,15 @@ if(i) res += dist[t];
 <p>注意这里，加入条件判断确保不被自环影响，自环不应该加入到最小生成树中</p>
 
 ```
+if(i) res += dist[t];
+for(int j = 1; j <= n; j ++ ) dist[j] = min(dist[j], g[t][j]);
+```
+
+<p>被污染也无所谓，只要在被污染前更新 res 就可以了，毕竟 Prim 的更新操作是 dist[j] = min(dist[j], g[t][j]) 而不是 Dijkstra 的 dist[j] = min(dist[j], dist[t] + g[t][j])，污染与否无所谓</p>
+
+<b>也可以让所有 g[i][i] 等于 INF</b>
+
+```
 5 10
 1 2 8
 2 2 7
@@ -1411,7 +1421,89 @@ if(i) res += dist[t];
 
 </br>
 
-<p>堆优化的思路和 Dijkstra 一样</p>
+<p>堆优化的思路和 Dijkstra 完全一样，用堆来维护 dist 数组，找最小值为 O(1)，更新为 O(mlogn)</p>
+
+<p>思路麻烦，代码长，完全可以用 Kruskal 替代</p>
+
+</br>
+
+## Kruskal
+
+</br>
+
+<p>基本思路非常简单：从小到大枚举每条边，从小到大试图将每一条边加到生成树中，剩下的问题就是<b>并查集的简单应用</b>，并查集非常快为 O(1)</p>
+
+```
+将所有边按照权重从小到大排序 //瓶颈：O(mlogm)
+枚举每条边 a, b, w //循环总共为 O(m)
+    if(a, b 不连通)
+          将这条边加入集合中 
+```
+
+<p>参考题目连通块中点的数量，Kruskal 最开始的时候每个点都是单独的一部分，也是没有边的</p>
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 200010;
+
+int n, m;
+int p[N];
+
+struct Edge
+{
+    int a, b, w;
+    
+    bool operator< (const Edge &W) const
+    {
+        return w < W.w;
+    }
+}edges[N];
+
+int find(int x)
+{
+    if(p[x] != x) p[x] = find(p[x]);
+    return p[x];
+}
+
+int main()
+{
+    scanf("%d%d", &n, &m);
+    
+    for(int i = 0; i < m; i ++ )
+    {
+        int a, b, w;
+        scanf("%d%d%d", &a, &b, &w);
+        edges[i] = {a, b, w};
+    }
+    
+    sort(edges, edges + m);
+    
+    for(int i = 1; i <= n; i ++ ) p[i] = i;//初始化并查集
+    
+    int res = 0, cnt = 0;
+    for(int i = 0; i < m; i ++ )
+    {
+        int a = edges[i].a, b = edges[i].b, w = edges[i].w;
+        
+        a = find(a), b = find(b); //让 a 等于 a 的祖宗节点，b 等于 b 的祖宗节点
+        if(a != b) //判断 a， b 是否是连通的，就是判断二者祖宗节点是否一样
+        {
+            p[a] = b; //边加进来后，要把这两个集合合并
+            res += w;
+            cnt ++;
+        }
+    }
+    
+    if(cnt < n - 1) puts("impossible"); //若 cnt < n - 1 说明树不连通
+    else printf("%d\n", res);
+    
+    return 0;
+}
+```
 
 </br>
 
