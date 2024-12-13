@@ -1612,6 +1612,96 @@ int main()
 }
 ```
 
+<p>题目：257. 关押罪犯，</p>
+
+</br>
+
+## 匈牙利算法
+
+</br>
+
+<p>证明较难，参考算法导论</p>
+
+<p>思路：可以在较快的时间内，告诉我们左边和右边匹配成功（不存在两条边是共用一个点的）的最大的数量（边的数量）是多少，</p>
+
+<p>涉及到一个递归的过程，递归要处理问题是一样的</p>
+
+<p>遍历 O(n) 个左集合，最坏情况下遍历所有边 O(nm)</p>
+
+</br>
+
+<b>二分图的最大匹配</b>
+
+</br>
+
+![050953861f85746597417d60e91fdd6c](https://github.com/user-attachments/assets/2a4d2d19-31a7-4186-8e1a-5aafa6638295)
+
+<p>虽然是无向边，但只会找左集中的点指向右集中的点的边，不会从右往左</p>
+
+```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N = 510, M = 100010;
+
+int n1, n2, m;
+int h[N], e[M], ne[M], idx; //e[N] 的话会导致数组越界，什么错误都可能发生
+int match[N]; //match 是右边的点对应的点
+bool st[N];
+
+void add(int a, int b)
+{
+    e[idx] = b, ne[idx] = h[a], h[a] = idx ++ ;
+}
+
+bool find(int x)
+{
+    for(int i = h[x]; i != -1; i = ne[i])
+    {
+        int j = e[i];
+        if(!st[j])
+        {
+            st[j] = true;
+            if (match[j] == 0 || find(match[j]))
+            {
+                match[j] = x;
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+int main()
+{
+    scanf("%d%d%d", &n1, &n2, &m);
+    
+    memset(h, -1, sizeof h);
+
+    while(m -- )
+    {
+        int a, b;
+        scanf("%d%d", &a, &b);
+        add(a, b);
+    }
+    
+    int res = 0;
+    for(int i = 1; i <= n1; i ++ )
+    {
+        memset(st, false, sizeof st); //请空，要保证每个 n2 只考虑一遍
+        if(find(i)) res ++ ;
+    }
+    
+    printf("%d\n", res);
+    
+    return 0;
+}
+```
+
 
 
 
