@@ -84,7 +84,7 @@ quick_sort(q, j + 1, r);
 
 </br>
 
-<p>正常时快排是不稳定排序的，原因在于会有值相同的情况，想要稳定的话可以用一个 pair<int, int> 进行双关键字排序（pair的operator 先根据 first 再根据 second 排序），这样的话<b>所有值都不相同了</b></p>
+<p>正常时快排是不稳定排序的，原因在于会有值相同的情况，想要稳定的话可以用一个 pair<int, int> 进行<b>双关键字排序</b>（pair的operator 先根据 first 再根据 second 排序），这样的话<b>所有值都不相同了</b></p>
 
 </br>
 
@@ -101,6 +101,54 @@ quick_sort(q, j + 1, r);
 2. 递归排序left， right
 
 3. 归并————合二为一（双指针算法）
+
+```
+#include <iostream>
+
+using namespace std;
+
+const int N = 1e5 + 10;
+
+int f[N], tmp[N];
+
+void merge_sort(int q[], int l, int r)
+{
+    if(l >= r) return;
+    
+    int mid = l + r >> 1;
+    
+    merge_sort(q, l, mid), merge_sort(q, mid + 1, r);
+    
+    int k = 0, i = l, j = mid + 1;
+    while(i <= mid && j <= r)
+    {
+        if(q[i] <= q[j]) tmp[k ++ ] = q[i ++ ];
+        else tmp[k ++ ] = q[j ++ ];
+    }
+    while(i <= mid) tmp[k ++ ] = q[i ++ ];
+    while(j <= r) tmp[k ++ ] = q[j ++ ];
+    
+    for(int i = l, j = 0; i <= r; i ++ , j ++ ) q[i] = tmp[j];
+}
+
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int n;
+    cin >> n;
+    for(int i = 0; i < n; i ++ ) cin >> f[i];
+    
+    merge_sort(f, 0, n - 1);
+    
+    for(int i = 0; i < n; i ++ ) cout << f[i] << " ";
+    
+    cout << endl;
+    
+    return 0;
+}
+```
 
 
 
