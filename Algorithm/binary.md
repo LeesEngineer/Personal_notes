@@ -38,13 +38,6 @@ int binary_2(int l, int r)
 
 ![c0c5336845f98a1b54a640dec80c5fde](https://github.com/user-attachments/assets/d07bbab7-3840-4342-b0ee-183e502a5078)
 
-<p>先来看二分出红色边节点：</p>
-
-1. mid = (l + r) / 2
-
-2. if(check(mid))
-- 如果为 true 的话，那么 mid 一定是在红色区间内，那么答案就在 [mid, r]，答案可以取到 mid ，更新方式就是把
-
 </br>
 
 # 浮点数二分
