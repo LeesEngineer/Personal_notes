@@ -231,6 +231,181 @@ int main()
 
 </br>
 
+# 双端BFS
+
+</br>
+    
+## 算法
+
+<p>在 0-1 BFS 问题中，我们的目标是 最小化代价，而代价只有 0 或 1。使用双端队列(deque) 能更高效地管理 0 和 1 代价的节点：</p>
+
+- **代价为 0**：我们使用 q.emplace_front() **放入队列前端**，保证它 **更早被处理**。
+
+- **代价为 1**：我们使用 q.emplace_back() **放入队列后端**，让它 **稍后处理**。
+
+<p>这样可以确保：</p>
+
+- **所有代价为 0 的路径先扩展**，保证当前步数尽快更新。
+
+- **代价为 1 的路径稍后处理**，从而维持 BFS 的正确性。
+
+### 什么是 0-1 BFS？
+
+<p>**0-1 BFS** 是一种用于 **带权图的最短路径算法**，但 **权值只能是 0 或 1**。它的特点</p>
+
+- 使用 **双端队列 (deque)** 代替普通的队列 (queue)。
+
+- **当权值为 0 时，节点插入队列头部**，保证它 **优先处理**。
+
+- **当权值为 1 时，节点插入队列尾部**，表示它 **稍后处理**。
+
+<p>本质上是 Dijkstra 算法的特例，但比普通的 Dijkstra 更快，时间复杂度是 O(V + E)。</p>
+
+### 0-1 BFS 的流程
+
+1. **初始化队列**，把起点 (px1, py1) 插入 deque 的前端，并设置 cache[px1][py1] = 0。
+
+2. **使用双端队列进行 BFS**：
+
+- **如果可以走到邻居格子，且代价是 0**（颜色相同），那么**插入队列前端** (emplace_front)。
+
+- **如果可以走到邻居格子，且代价是 1**（颜色不同），那么**插入队列后端** (emplace_back)。
+
+3. **终止条件**：找到目标 (px2, py2) 时返回 cache[px2][py2]。
+
+### 为什么 0-1 BFS 比普通 BFS 快?
+
+<p>普通的 BFS 适用于无权图，但在带权图（即 0 和 1 代价）中：</p>
+
+- 普通 **BFS** 不能保证 **先扩展代价较小的路径**，导致某些路径可能晚扩展，影响最短路径计算。
+
+- **0-1 BFS** **保证代价为 0 的路径优先扩展**，不会浪费步数，确保 **更快找到最短路径**。
+
+### 与 Dijkstra 算法的关系
+
+- **Dijkstra** 适用于 **任意非负权图**，通常使用 **优先队列 (priority_queue)** ，复杂度 **O(E log V)** 。
+
+- **0-1 BFS** 是 **Dijkstra 的特例**，但使用 **双端队列 (deque) 代替优先队列**，复杂度降为 **O(V + E)** 。
+
+## Description
+
+小明最近喜欢玩一个游戏。给定一个n * m的棋盘，上面有两种格子#和@。游戏的规则很简单：给定一个起始位置和一个目标位置，小明每一步能向上，下，左，右四个方向移动一格。如果移动到同一类型的格子，则费用是0，否则费用是1。请编程计算从起始位置移动到目标位置的最小花费。
+
+### Input
+
+<p>输入文件有多组数据。</p>
+
+输入第一行包含两个整数n，m，分别表示棋盘的行数和列数。
+
+输入接下来的n行，每一行有m个格子（使用#或者@表示）。
+
+输入接下来一行有四个整数x1, y1, x2, y2，分别为起始位置和目标位置。
+
+<p>当输入n，m均为0时，表示输入结束。<p>
+    
+### Output
+
+    对于每组数据，输出从起始位置到目标位置的最小花费。每一组数据独占一行。
+
+```Input
+2 2
+@#
+#@
+0 0 1 1
+2 2
+@@
+@#
+0 1 1 0
+0 0
+```
+
+```Output
+2
+0
+```
+
+<p>对于100%的数据满足：1 < = n, m <= 500。<p>
+
+## 源代码
+
+```
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef pair<int, int> PII;
+
+const int N = 510;
+
+char g[N][N];
+bool st[N][N];
+int d[N][N];
+
+int n, m;
+
+int bfs(int x, int y, int t_x, int t_y)
+{
+    int dx[4] = {-1, 0, 1, 0}, dy[4] = {0, -1, 0, 1};
+
+    deque<PII> q; 
+    memset(st, 0, sizeof st);
+    memset(d, 0x3f, sizeof d);
+
+    q.push_front(make_pair(x, y));
+    st[x][y] = true;
+    d[x][y] = 0;
+
+    while (!q.empty())
+    {
+        PII t = q.front();
+        q.pop_front();
+        int x = t.first, y = t.second;
+
+        for (int i = 0; i < 4; i++)
+        {
+            int a = x + dx[i], b = y + dy[i];
+            if (a >= 0 && a < n && b >= 0 && b < m && !st[a][b])
+            {
+                st[a][b] = true;
+                if (g[a][b] == g[x][y]) 
+                {
+                    d[a][b] = d[x][y];
+                    q.push_front(make_pair(a, b));
+                }
+                else 
+                {
+                    d[a][b] = d[x][y] + 1;
+                    q.push_back(make_pair(a, b));
+                }
+
+                if (a == t_x && b == t_y) return d[a][b];
+            }
+        }
+    }
+    return -1;
+}
+
+int main()
+{
+    while (cin >> n >> m, n && m)
+    {
+        memset(d, 0x3f, sizeof d);
+        memset(st, 0, sizeof st);
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                cin >> g[i][j];
+        
+        int x, y, t_x, t_y;
+        cin >> x >> y >> t_x >> t_y;
+
+        cout << bfs(x, y, t_x, t_y) << endl;
+    }
+}
+```
+
+</br>
+
 # 树和图的遍历 
 
 </br>
