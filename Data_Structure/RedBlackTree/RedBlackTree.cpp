@@ -1,201 +1,261 @@
-#include <iostream>
+typedef enum { RED = 0, BLACK } Color;
 
-using namespace std;
-
-enum Color { RED, BLACK };
-
-// 红黑树节点
-struct Node
-{
-    int data; // 节点值
-    bool color; // 颜色
-    Node *left, *right, *parent; // 左右子节点及父节点
-    
-    // 构造函数
-    Node(int data)
-    {
-        this->data = data;
-        left = right = parent = nullptr;
-        this->color = RED; // 新插入的节点为红色
-    }
+template <typename Type>
+struct RBTNode {
+    Color color;
+    Type key;
+    RBTNode* left;
+    RBTNode* right;
+    RBTNode* parent;
 };
 
-// 红黑树
-class RedBlackTree
-{
-private:
-    Node *root; // 根节点
-    
-    // 左旋操作
-    void rotateLeft(Node *&root, Node *&pt)
-    {
-        Node *pt_right = pt->right;
-        pt->right = pt_right->left;
-        if (pt->right != nullptr)
-            pt->right->parent = pt;
-        pt_right->parent = pt->parent;
-        if (pt->parent == nullptr)
-            root = pt_right;
-        else if (pt == pt->parent->left)
-            pt->parent->left = pt_right;
-        else
-            pt->parent->right = pt_right;
-        pt_right->left = pt;
-        pt->parent = pt_right;
+template<typename Type>
+class RBTree {
+public:
+    RBTree() {
+        Nil = BuyNode();
+        root = Nil;
+        Nil->color = BLACK;
     }
-    
-    // 右旋操作
-    void rotateRight(Node *&root, Node *&pt)
-    {
-        Node *pt_left = pt->left;
-        pt->left = pt_left->right;
-        if (pt->left != nullptr)
-            pt->left->parent = pt;
-        pt_left->parent = pt->parent;
-        if (pt->parent == nullptr)
-            root = pt_left;
-        else if (pt == pt->parent->left)
-            pt->parent->left = pt_left;
-        else
-            pt->parent->right = pt_left;
-        pt_left->right = pt;
-        pt->parent = pt_left;
+
+    ~RBTree() {
+        destroy(root);
+        delete Nil;
+        Nil = NULL;
     }
-    
-    // 调整树以保持红黑树性质
-    void fixViolation(Node *&root, Node *&pt)
-    {
-        Node *parent_pt = nullptr;
-        Node *grand_parent_pt = nullptr;
-        while ((pt != root) && (pt->color != BLACK) &&
-               (pt->parent->color == RED))
-        {
-            parent_pt = pt->parent;
-            grand_parent_pt = pt->parent->parent;
-            // 情况A: 父节点是祖父节点的左子节点
-            if (parent_pt == grand_parent_pt->left) {
-                Node *uncle_pt = grand_parent_pt->right;
-                // 情况1: 叔叔节点是红色
-                if (uncle_pt != nullptr && uncle_pt->color == RED)
-                {
-                    grand_parent_pt->color = RED;
-                    parent_pt->color = BLACK;
-                    uncle_pt->color = BLACK;
-                    pt = grand_parent_pt;
-                }
-                else
-                {
-                    // 情况2: 叔叔节点是黑色，且当前节点是右子节点
-                    if (pt == parent_pt->right)
-                    {
-                        rotateLeft(root, parent_pt);
-                        pt = parent_pt;
-                        parent_pt = pt->parent;
-                    }
-                    // 情况3: 叔叔节点是黑色，且当前节点是左子节点
-                    rotateRight(root, grand_parent_pt);
-                    swap(parent_pt->color, grand_parent_pt->color);
-                    pt = parent_pt;
-                }
+
+    void InOrder() { InOrder(root); }
+
+    bool Insert(const Type &value) {
+        RBTNode<Type>* pr = Nil;
+        RBTNode<Type>* s = root;
+        while (s != Nil) {
+            if (value == s->key) {
+                return false;
             }
-            // 情况B: 父节点是祖父节点的右子节点
-            else
-            {
-                Node *uncle_pt = grand_parent_pt->left;
-                // 情况1: 叔叔节点是红色
-                if ((uncle_pt != nullptr) && (uncle_pt->color == RED)) {
-                    grand_parent_pt->color = RED;
-                    parent_pt->color = BLACK;
-                    uncle_pt->color = BLACK;
-                    pt = grand_parent_pt;
-                }
-                else
-                {
-                    // 情况2: 叔叔节点是黑色，且当前节点是左子节点
-                    if (pt == parent_pt->left) {
-                        rotateRight(root, parent_pt);
-                        pt = parent_pt;
-                        parent_pt = pt->parent;
+            pr = s;
+            if (value < s->key) {
+                s = s->left;
+            } else {
+                s = s->right;
+            }
+        }
+        s = BuyNode(value);
+        if (pr == Nil) {
+            root = s;
+            root->parent = pr;
+        } else {
+            if (value < pr->key) {
+                pr->left = s;
+            } else {
+                pr->right = s;
+            }
+            s->parent = pr;
+        }
+        Insert_Fixup(s);
+        return true;
+    }
+
+    void Remove(Type key) {
+        RBTNode<Type>* t;
+        if ((t = Search(root, key)) != Nil) {
+            Remove(t);
+        }
+    }
+
+    void InOrderPrint() { InOrderPrint(root); }
+
+protected:
+    RBTNode<Type>* BuyNode(const Type &x = Type()) {
+        RBTNode<Type>* s = new RBTNode<Type>();
+        assert(s != NULL);
+        s->color = RED;
+        s->left = s->right = s->parent = Nil;
+        s->key = x;
+        return s;
+    }
+
+    void InOrder(RBTNode<Type>* root) {
+        if (root != Nil) {
+            InOrder(root->left);
+            cout << root->key << " ";
+            InOrder(root->right);
+        }
+    }
+
+    void LeftRotate(RBTNode<Type>* z) {
+        RBTNode<Type>* y = z->right;
+        z->right = y->left;
+        if (y->left != Nil) {
+            y->left->parent = z;
+        }
+        y->parent = z->parent;
+        if (root == z) {
+            root = y;
+        } else if (z == z->parent->left) {
+            z->parent->left = y;
+        } else {
+            z->parent->right = y;
+        }
+        y->left = z;
+        z->parent = y;
+    }
+
+    void RightRotate(RBTNode<Type>* z) {
+        RBTNode<Type>* y = z->left;
+        z->left = y->right;
+        if (y->right != Nil) {
+            y->right->parent = z;
+        }
+        y->parent = z->parent;
+        if (root == z) {
+            root = y;
+        } else if (z == z->parent->left) {
+            z->parent->left = y;
+        } else {
+            z->parent->right = y;
+        }
+        y->right = z;
+        z->parent = y;
+    }
+
+    void Insert_Fixup(RBTNode<Type>* s) {
+        RBTNode<Type>* uncle;
+        while (s->parent->color == RED) {
+            if (s->parent == s->parent->parent->left) {
+                uncle = s->parent->parent->right;
+                if (uncle->color == RED) {
+                    s->parent->color = BLACK;
+                    uncle->color = BLACK;
+                    s->parent->parent->color = RED;
+                    s = s->parent->parent;
+                } else {
+                    if (s == s->parent->right) {
+                        s = s->parent;
+                        LeftRotate(s);
                     }
-                    // 情况3: 叔叔节点是黑色，且当前节点是右子节点
-                    rotateLeft(root, grand_parent_pt);
-                    swap(parent_pt->color, grand_parent_pt->color);
-                    pt = parent_pt;
+                    s->parent->color = BLACK;
+                    s->parent->parent->color = RED;
+                    RightRotate(s->parent->parent);
+                }
+            } else {
+                if (s->parent == s->parent->parent->right) {
+                    uncle = s->parent->parent->left;
+                    if (uncle->color == RED) {
+                        s->parent->color = BLACK;
+                        uncle->color = BLACK;
+                        s->parent->parent->color = RED;
+                        s = s->parent->parent;
+                    } else {
+                        if (s == s->parent->left) {
+                            s = s->parent;
+                            RightRotate(s);
+                        }
+                        s->parent->color = BLACK;
+                        s->parent->parent->color = RED;
+                        LeftRotate(s->parent->parent);
+                    }
                 }
             }
         }
         root->color = BLACK;
     }
-    
-public:
-    
-    // 构造函数
-    RedBlackTree() { root = nullptr; }
-    
-    // 插入新节点
-    void insert(const int &data)
-    {
-        Node *pt = new Node(data);
-        // 执行BST插入
-        root = BSTInsert(root, pt);
-        // 修复红黑树的性质
-        fixViolation(root, pt);
-    }
-    
-    // 中序遍历
-    void inorder() { inorderHelper(root); }
-    
-    // 层序遍历
-    void levelOrder() { levelOrderHelper(root); }
-    
-private:
-    
-    // 中序遍历辅助函数
-    void inorderHelper(Node *root)
-    {
-        if (root == nullptr)
-            return;
-        inorderHelper(root->left);
-        cout << root->data << " ";
-        inorderHelper(root->right);
-    }
-    
-    // 层序遍历辅助函数
-    void levelOrderHelper(Node *root)
-    {
-        if (root == nullptr)
-            return;
-        std::queue<Node *> q;
-        q.push(root);
-        while (!q.empty())
-        {
-            Node *temp = q.front();
-            cout << temp->data << " ";
-            q.pop();
-            if (temp->left != nullptr)
-                q.push(temp->left);
-            if (temp->right != nullptr)
-                q.push(temp->right);
+
+    RBTNode<Type>* Search(RBTNode<Type>* root, Type key) const {
+        if (root == Nil) {
+            return Nil;
+        }
+        if (root->key == key) {
+            return root;
+        }
+        if (key < root->key) {
+            return Search(root->left, key);
+        } else {
+            return Search(root->right, key);
         }
     }
-    
-    // 标准BST插入
-    Node *BSTInsert(Node *root, Node *pt)
-    {
-        // 如果树为空，返回新节点
-        if (root == nullptr)
-            return pt;
-        // 否则递归插入子树
-        if (pt->data < root->data)
-        {
-            root->left = BSTInsert(root->left, pt);
-            root->left->parent = root;
+
+    void Transplant(RBTNode<Type>* u, RBTNode<Type>* v) {
+        if (u->parent == Nil) {
+            root = v;
+        } else if (u == u->parent->left) {
+            u->parent->left = v;
+        } else {
+            u->parent->right = v;
         }
-        else if (pt->data > root->data)
-        {
-            root->right = BSTInsert(root->right, pt);
-            root->right->parent = root;
-        }
-        return root;
+        v->parent = u->parent;
     }
+
+    RBTNode<Type>* Minimum(RBTNode<Type>* x) {
+        if (x->left == Nil) {
+            return x;
+        }
+        return Minimum(x->left);
+    }
+
+    void Remove(RBTNode<Type>* z) {
+        RBTNode<Type>* x = Nil;
+        RBTNode<Type>* y = z;
+        Color ycolor = y->color;
+        if (z->left == Nil) {
+            x = z->right;
+            Transplant(z, z->right);
+        } else if (z->right == Nil) {
+            x = z->left;
+            Transplant(z, z->left);
+        } else {
+            y = Minimum(z->right);
+            ycolor = y->color;
+            x = y->right;
+            if (y->parent == z) {
+                x->parent = y;
+            } else {
+                Transplant(y, y->right);
+                y->right = z->right;
+                y->right->parent = y;
+            }
+            Transplant(z, y);
+            y->left = z->left;
+            z->left->parent = y;
+            y->color = z->color;
+        }
+        if (ycolor == BLACK) {
+            Remove_Fixup(x);
+        }
+    }
+
+    void Remove_Fixup(RBTNode<Type>* x) {
+        while (x != root && x->color == BLACK) {
+            if (x == x->parent->left) {
+                RBTNode<Type>* w = x->parent->right;
+                if (w->color == RED) {
+                    w->color = BLACK;
+                    x->parent->color = RED;
+                    LeftRotate(x->parent);
+                    w = x->parent->right;
+                }
+                if (w->left->color == BLACK && w->right->color == BLACK) {
+                    w->color = RED;
+                    x = x->parent;
+                } else {
+                    if (w->right->color == BLACK) {
+                        w->color = RED;
+                        RightRotate(w);
+                        w = x->parent->right;
+                    }
+                    w->color = x->parent->color;
+                    x->parent->color = BLACK;
+                    w->right->color = BLACK;
+                    LeftRotate(x->parent);
+                    x = root;
+                }
+            } else {
+                // 对称处理右子树
+            }
+        }
+        x->color = BLACK;
+    }
+
+    RBTNode<Type>* root;
+    RBTNode<Type>* Nil;
 };
