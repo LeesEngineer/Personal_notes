@@ -72,7 +72,7 @@ struct EdmondsKarp
                 for(int i = 0; i < G[x].size(); i ++)
                 {
                     Edge &e = edges[G[x][i]];
-                    if(!a[e.to] && e.cap > e.flow)
+                    if(!a[e.to] && e.cap > e.flow)  // 该点未访问且残余容量 > 0
                     {
                         p[e.to] = G[x][i];
                         a[e.to] = min(a[x], e.cap - e.flow)
