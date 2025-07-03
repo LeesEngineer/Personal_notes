@@ -127,6 +127,99 @@ int main()
 <p>该版本能处理环，<b>但无法处理重边</b></p>
 
 ```
+#include <iostream>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+const int N = 1e7;
+const int INF = 0x3f3f3f3f;
+
+struct Edge
+{
+    int from, to, cap, flow;
+};
+
+int h[N];
+int ne[N];
+Edge e[N];
+int idx;
+
+int a[N]; // a 记录改进量
+int p[N]; // p 记录入点
+
+void add(int a, int b, int c)
+{
+    e[idx] = {a, b, c, 0}, ne[idx] = h[a], h[a] = idx ++;
+}
+
+int EdmondsKarp(int s, int t)
+{
+    int flow = 0;
+    while(true)
+    {
+        memset(a, 0, sizeof a);
+        queue<int> q;
+        q.push(s);
+        a[s] = INF;
+        while(!q.empty())
+        {
+            int x = q.front();
+            q.pop();
+            for(int i = h[x]; i != -1; i = ne[i])
+            {
+                int y = e[i].to;
+                int c = e[i].cap, f = e[i].flow;
+                if(!a[y] && c > f) // 这里 !a[y] 很细节
+                {
+                    p[y] = i;
+                    a[y] = min(a[x], c - f);
+                    q.push(y);
+                }
+            }
+            if(a[t]) break;
+        }
+        if(!a[t]) break;
+        
+        for(int u = t; u != s; u = e[p[u]].from)
+        {
+            e[p[u]].flow += a[t];
+            e[p[u]^1].flow -= a[t];
+        }
+        flow += a[t];
+    }
+    return flow;
+}
+
+int main()
+{
+    int t;
+    cin >> t;
+    while(t --)
+    {
+
+        memset(h, -1, sizeof h);
+        
+        int n, m;
+        cin >> n >> m;
+        
+        for(int i = 0; i < m; i ++)
+        {
+            int a, b, c;
+            cin >> a >> b >> c;
+            add(a, b, c), add(b, a, 0);
+        }
+        
+        int f = EdmondsKarp(1, n);
+        cout << f << endl;
+    }
+}
+```
+
+<p>自我改进版</p>
+
+```
 #include<iostream>
 #include<vector>
 #include<queue>
@@ -183,106 +276,7 @@ int main()
 }
 ```
 
-<p>该版本能处理重边</p>
-
-```
-struct Edge
-{
-    int from, to, cap, flow;
-    
-    Edge(int u, int v, int c, int f): from(u), to(v), cap(c), flow(f) {}
-};
-
-struct EdmondsKarp
-{
-    int n, m;
-    
-    vector<Edge> edges;
-    vector<int> G[maxn];
-    int a[maxn];
-    int p[maxn];
-    
-    void init(int n)
-    {
-        for(int i = 0; i < n; i ++) G[i].clear();
-        edges.clear();
-    }
-    
-    void AddEdge(int from, int to, int cap)
-    {
-        edges.push_back(Edge(from, to, cap, 0));
-        edges.push_back(Edge(to, from, 0, 0));
-        m = edges.size();
-        G[from].push_back(m - 2);
-        G[to].push_back(m - 1)
-    }
-    
-    int Maxflow(int s, int t)
-    {
-        int flow = 0;
-        for(;;)
-        {
-            memset(a, 0, sizeof a);
-            queue<int> q;
-            q.push(s);
-            a[s] = INF;
-            while(!q.empty())
-            {
-                int x = q.front();
-                q.pop();
-                for(int i = 0; i < G[x].size(); i ++)
-                {
-                    Edge &e = edges[G[x][i]];
-                    if(!a[e.to] && e.cap > e.flow)  // 该点未访问且残余容量 > 0
-                    {
-                        p[e.to] = G[x][i];
-                        a[e.to] = min(a[x], e.cap - e.flow)
-                        q.push(e.to);
-                    }
-                }
-                if(a[t]) break;
-                
-            }
-            if(!a[t]) break;
-            for(int u = t; u != s; u = edges[p[u]].from)
-            {
-                edges[p[u]].flow += a[t];
-                edges[p[u] ^ 1].flow -= a[t];
-            }
-            flow += a[t];
-        }
-        return flow;
-    }
-};
-```
-
-<P>pro max 版本</P>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<p>别人的答案</p>
 
 
 
