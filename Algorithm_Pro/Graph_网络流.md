@@ -93,7 +93,7 @@ int EdmondsKarp(int s, int t)
         
         for(int u = t; u != s; u = p[u])
         {
-            for(int i = h[p[u]]; i != -1; i = ne[i])
+            for(int i = h[p[u]]; i != -1; i = ne[i]) // 不能处理重边问题就出在这里，因为记录的是点的索引，而不是边的索引
                 if(e[i] == u)
                 {
                     w[i].flow += a[t];
