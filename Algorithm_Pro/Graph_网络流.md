@@ -409,7 +409,7 @@ void add(int a, int b, int c, int d)
 
 int MCMF(int s, int t, int &cost)
 {
-
+    int flow = 0; cost = 0;
 
     while(true)
     {
@@ -430,9 +430,9 @@ int MCMF(int s, int t, int &cost)
             for(int i = h[x]; i != -1; i = ne[i])
             {
                 int y = e[i].to;
-                if(e[i].cap > e[i].flow && dist[y] > dist[x] + e[i].cost)
+                if(e[i].cap > e[i].flow && d[y] > d[x] + e[i].cost)
                 {
-                    dist[y] = dist[x] + e[i].cost;
+                    d[y] = d[x] + e[i].cost;
                     p[y] = i;
                     a[y] = min(a[x], e[i].cap - e[i].flow);
                     if(!st[y])
@@ -451,7 +451,6 @@ int MCMF(int s, int t, int &cost)
                 e[p[u]].flow += a[t];
                 e[p[u]^1].flow -= a[t];
             }
-            flow += a[t];
         }
     }
     return flow;
