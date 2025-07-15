@@ -377,6 +377,107 @@ struct MCMF
 };
 ```
 
+```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N = 1e5;
+
+struct Edge
+{
+    int from, to, cap, flow, cost;
+};
+
+int h[N];
+Edge e[M];
+int ne[N];
+int idx;
+
+int p[N];
+int a[N];
+
+int st[N];
+int d[N];
+
+void add(int a, int b, int c, int d)
+{
+    e[idx] = {a, b, c, 0, d}, ne[idx] = h[a], h[a] = idx ++;
+}
+
+int MCMF(int s, int t, int &cost)
+{
+
+
+    while(true)
+    {
+        memset(d, 0x3f, sizeof d);
+        a[s] = 0x3f3f3f3f;
+
+        queue<int> q;
+        q.push(s);
+        st[s] = 1;
+        d[s] = 0;
+
+        while(!q.empty())
+        {
+            int x = q.front();
+            q.pop();
+            st[x] = 0;
+            
+            for(int i = h[x]; i != -1; i = ne[i])
+            {
+                int y = e[i].to;
+                if(e[i].cap > e[i].flow && dist[y] > dist[x] + e[i].cost)
+                {
+                    dist[y] = dist[x] + e[i].cost;
+                    p[y] = i;
+                    a[y] = min(a[x], e[i].cap - e[i].flow);
+                    if(!st[y])
+                    {
+                        q.push(y);
+                        st[y] = 1;
+                    }
+                }
+            }
+            if(d[t] == 0x3f3f3f3f) break;
+
+            flow += a[t];
+            cost += a[t] * d[t];
+            for(int u = t; u != s; u = e[p[u]].from)
+            {
+                e[p[u]].flow += a[t];
+                e[p[u]^1].flow -= a[t];
+            }
+            flow += a[t];
+        }
+    }
+    return flow;
+}
+
+int main()
+{
+    memset(h, -1, sizeof h);
+
+    int n, m;
+    cin >> n >> m;
+    for(int i = 0; i < m; i ++)
+    {
+        int a, b, c, d;
+        cin >> a >> b >> c >> d;
+        add(a, b, c, d), add(b, a, 0, -d);
+    }
+
+    int flow, cost;
+    flow = MCMF(1, n, cost);
+    cout << flow << " " << cost;
+
+    return 0;
+}
+```
+
 
 
 
