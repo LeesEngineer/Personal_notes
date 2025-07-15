@@ -278,11 +278,104 @@ int main()
 
 <p>别人的答案</p>
 
+</br>
 
+# 最小费用最大流问题
 
+</br>
 
+<p>给网络流增加一个因素：费用（a）。假设每条边除了有一个容量限制外，还有一个单位流量所需的费用</p>
 
+<p>在最小费用流问题中，平行边就变得有意义了，由于费用的出现，无法合并这两条弧</p>
 
+<p>为了方便描述算法，先假定图中不存在平行边和反向边，可以使用两个邻接矩阵 cap 和 cost 来保存各自的费用和容量，为了允许反向增广，规定 cap[v][u] = 0 并且 cost[v][u] = -coat[u][v]，表示沿着 (u, v) 反向增广时，费用减少 cost[u][v]</p>
+
+<p>最小费用算法和 Edmonds-Karp 算法类似，但每次使用 Bellman-Ford 算法而非 BFS 找增广路（用 SPFA 也可以）。<b>用最短路算法计算图的距离标号，然后沿着可行边进行增广</b></p>
+    
+<p><b>只要初始流是该流量下的最小费用可行流，每次增广后的新流都是新流量下的最小费用流</b>。另外，费用可正可负</p>
+
+```
+// 官解
+struct Edge
+{
+    int from, to, cap, flow, cost;
+};
+
+struct MCMF
+{
+    int n, m;
+    vector<Edge> edges;
+    vector<int> G[N];
+    
+    int inq[N];
+    int d[N];
+    int p[N];
+    int a[N];
+    
+    void init(int n)
+    {
+        this -> n = n;
+        for(int i = 0; i < n; i ++) G[i].clear();
+        edges.clear();
+    }
+    
+    void AddEgde(int from, int to, int cap, int cost)
+    {
+        edges.push_back({from, to, cap, 0, cost});
+        edges.push_back({to, from, 0, 0, -cost});
+        m = edges.size();
+        G[from].push_back(m - 2);
+        G[to].push_back(m - 1);
+    }
+    
+    bool BellmanFord(int s, int t, int &flow, long long &cost)
+    {
+        for(int i = 0; i < n; i ++)d[i] = INF;
+        memset(inq, 0, sizeof inq);
+        d[s] = 0; inq[s] = 1; p[s] = 0; a[s] = INF;
+        
+        queue<int> Q;
+        Q.push(s);
+        while(!Q.empty())
+        {
+            int u = Q.front(); Q.pop();
+            inq[u] = 0;
+            
+            for(int i = 0; i < G[u].size(); i ++)
+            {
+                Edge &e = edges[G[u][i]];
+                if(e.cap > e.flow && d[e.to] > d[u] + e.cost)
+                {
+                    d[e.to] = d[u] + e.cost;
+                    p[e.to] = G[u][i];
+                    a[e.to] = min(a[u], e.cap - e.flow);
+                    if(!inq[e.to])
+                    {
+                        Q.push(e.to);
+                        inq[e.to] = 1;
+                    }
+                }
+            }
+        }
+        if(d[t] == INF) return flase;
+        flow += a[t];
+        cost += (long long)d[t] * (long long)a[t];
+        for(int u = t; u != s; u = edges[p[u]].from)
+        {
+            edges[p[u]].flow += a[t];
+            edges[p[u]^1].flow -= a[t];
+        }
+        return true;
+    }
+    
+    int MincostMaxflow(int s, int t, long long & cost) // 要确保没有负环
+    {
+        int flow = 0, cost = 0;
+        while(BellmanFord(s, t, flow, cost));
+        return flow;
+    }
+};
+```
 
 
 
