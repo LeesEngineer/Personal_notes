@@ -377,6 +377,61 @@ struct MCMF
 };
 ```
 
+```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N = 1e5;
+
+struct Edge
+{
+    int from, to, cap, flow, cost;
+};
+
+int h[N];
+Edge e[M];
+int ne[N];
+int idx;
+
+int p[N];
+int a[N];
+
+int inq[N];
+int d[N];
+
+void add(int a, int b, int c, int d)
+{
+    e[idx] = {a, b, c, 0, d}, ne[idx] = h[a], h[a] = idx ++;
+}
+
+int MCMF(int s, int t, int &cost)
+{
+
+}
+
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    for(int i = 0; i < m; i ++)
+    {
+        int a, b, c, d;
+        cin >> a >> b >> c >> d;
+        add(a, b, c, d), add(b, a, 0, -d);
+    }
+
+    int flow, cost;
+    flow = MCMF(1, n, cost);
+    cout << flow << " " << cost;
+
+    return 0;
+}
+
+
+```
 
 
 
