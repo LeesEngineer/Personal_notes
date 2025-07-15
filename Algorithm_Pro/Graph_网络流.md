@@ -442,15 +442,15 @@ int MCMF(int s, int t, int &cost)
                     }
                 }
             }
-            if(d[t] == 0x3f3f3f3f) break;
+        }
+        if(d[t] == 0x3f3f3f3f) break;
 
-            flow += a[t];
-            cost += a[t] * d[t];
-            for(int u = t; u != s; u = e[p[u]].from)
-            {
-                e[p[u]].flow += a[t];
-                e[p[u]^1].flow -= a[t];
-            }
+        flow += a[t];
+        cost += a[t] * d[t];
+        for(int u = t; u != s; u = e[p[u]].from)
+        {
+            e[p[u]].flow += a[t];
+            e[p[u]^1].flow -= a[t];
         }
     }
     return flow;
