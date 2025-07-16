@@ -378,6 +378,7 @@ struct MCMF
 ```
 
 ```
+//自写
 #include <iostream>
 #include <algorithm>
 #include <cstring>
@@ -392,7 +393,7 @@ struct Edge
 };
 
 int h[N];
-Edge e[M];
+Edge e[N];
 int ne[N];
 int idx;
 
