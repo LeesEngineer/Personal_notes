@@ -1,4 +1,8 @@
-# 最大流问题
+<p>网络流是图论中的一个博大精深的分支</p>
+
+</br>
+
+# 最大流
 
 </br>
 
@@ -20,7 +24,7 @@ $$
 
 </br>
 
-# 增广路算法
+## Edmonds-Karp 增广路算法
 
 </br>
 
@@ -35,98 +39,7 @@ $$
 <p>虽然有了 flow 和 cap，但得益于Edge结构体的设计，Edmonds-Karp 和 Dijkstra 等算法很相近</p>
 
 ```
-#include <iostream>
-#include <cstring>
-#include <queue>
-
-using namespace std;
-
-const int N = 1e7;
-const int INF = 0x3f3f3f3f;
-
-struct Edge
-{
-    int cap, flow;
-};
-
-int h[N];
-int ne[N];
-int e[N];
-Edge w[N];
-int idx;
-
-int a[N]; // a 记录改进量
-int p[N]; // p 记录入点
-
-void add(int a, int b, Edge c)
-{
-    e[idx] = b, ne[idx] = h[a], w[idx] = c, h[a] = idx ++;
-}
-
-int EdmondsKarp(int s, int t)
-{
-    int flow = 0;
-    while(true)
-    {
-        memset(a, 0, sizeof a);
-        queue<int> q;
-        q.push(s);
-        a[s] = INF;
-        while(!q.empty())
-        {
-            int x = q.front();
-            q.pop();
-            for(int i = h[x]; i != -1; i = ne[i])
-            {
-                int y = e[i];
-                int c = w[i].cap, f = w[i].flow;
-                if(!a[y] && c > f) // 这里 !a[y] 很细节
-                {
-                    p[y] = x;
-                    a[y] = min(a[x], c - f);
-                    q.push(y);
-                }
-            }
-            if(a[t]) break;
-        }
-        if(!a[t]) break;
-        
-        for(int u = t; u != s; u = p[u])
-        {
-            for(int i = h[p[u]]; i != -1; i = ne[i]) // 不能处理重边问题就出在这里，因为记录的是点的索引，而不是边的索引
-                if(e[i] == u)
-                {
-                    w[i].flow += a[t];
-                    w[i^1].flow -= a[t];
-                }
-        }
-        flow += a[t];
-    }
-    return flow;
-}
-
-int main()
-{
-    memset(h, -1, sizeof h);
-    
-    int n, m;
-    cin >> n >> m;
-    
-    for(int i = 0; i < m; i ++)
-    {
-        int a, b, c;
-        cin >> a >> b >> c;
-        add(a, b, {c, 0}), add(b, a, {0, 0});
-    }
-    
-    int f = EdmondsKarp(1, n);
-    cout << f;
-}
-```
-
-<p>该版本能处理环，<b>但无法处理重边</b></p>
-
-```
+// 脱胎于刘汝佳的版本
 #include <iostream>
 #include <cstring>
 #include <queue>
@@ -217,66 +130,101 @@ int main()
 }
 ```
 
-<p>自我改进版</p>
+<p>一条从源点 S 到汇点 T 的路径上各边的剩余容量都大于 0，则为增广路。Edmonds-Karp 算法的思想就是不断用 BFS 寻找增广路。</p>
+
+<p>Edmonds-Karp 只考虑 f(x, y) < c(x, y) 的边。</p>
+
+<p>需要注意，根据斜对称性，当一条边的流量大于 0，他的反向边的流量就小于 0，此时必定有 f(y, x) < c(y, x)。故 Edmonds-Karp 在 BFS 时，除了原边集 E 之外，还应该考虑 E 中每条边的反向边</p>
+
+<p>具体实现时，可以按照邻接表“成对存储”技巧。只记录残余网络即可（每条边只记录剩余容量 c-f）</p>
+
+<p>Edmonds-Karp 时间复杂度为 O(nm^2)，效率较高，一般能处理 10^3 ~ 10^4 规模的网络</p>
 
 ```
-#include<iostream>
-#include<vector>
-#include<queue>
-#include<algorithm>
+// y总版
+#include <iostream>
+#include <cstring>
+#include <queue>
+
 using namespace std;
 
-vector<vector<int>>g;
-vector<int> pre;
-vector<int> a;
-int n, m;
+const int INF = 1 << 29, N = 2010, M = 20010;
 
-int EK(){
-    int flow=0;
+int h[N], e[M], ne[M], w[M], idx;
+int st[N], a[N], p[N];
+
+int n, m, s, t, flow;
+
+void add(int a, int b, int c)
+{
+    e[idx] = b, ne[idx] = h[a], w[idx] = c, h[a] = idx ++;
+}
+
+bool bfs()
+{
+    memset(st, 0, sizeof st);
     queue<int> q;
-    while(true){
-        q.push(1);
-        a.assign(n+1,0);
-        a[1]=1000;//源点流量无穷大
-        while(!q.empty()){
-            int vex=q.front();
-            q.pop();
-            for(int i=1;i<n+1;i++){
-                if(g[vex][i]>0 && a[i]==0){
-                    a[i]=min(a[vex],g[vex][i]);
-                    q.push(i);
-                    pre[i]=vex;
-                }
+    q.push(s);
+    st[s] = 1;
+    a[s] = INF;
+    while(!q.empty())
+    {
+        int x = q.front();
+        q.pop();
+        for(int i = h[x]; i != -1; i = ne[i])
+        {
+            if(w[i])
+            {
+                int y = e[i];
+                if(st[y]) continue;
+                a[y] = min(a[x], w[i]);
+                p[y] = i;
+                q.push(y), st[y] = 1;
+                if(y == t) return 1;
             }
         }
-        if(a[n]==0){
-            return flow;
-        }
-        flow+=a[n];
-        for(int i=n;i!=1;i=pre[i]){//更新剩余网络
-            g[pre[i]][i]-=a[n];
-            g[i][pre[i]]+=a[n];
-        }
     }
+    return 0;
+}
 
+void update()
+{
+    int x = t;
+    while(x != s)
+    {
+        int i = p[x];
+        w[i] -= a[t];
+        w[i^1] += a[t];
+        x = e[i^1];
+        // 这两行利用“成对存储“的 xor 1 技巧
+    }
+    flow += a[t];
 }
 
 int main()
 {
-    cin>>n>>m;
-    g.assign(n+1,vector<int>(n+1));
-    pre.assign(n+1,0);
-    int u, v, c;
-    for(int i=0;i<m;i++){
-        cin>>u>>v>>c;
-        g[u][v]+=c;
+    cin >> n >> m;
+    memset(h, -1, sizeof h);
+    s = 1, t = n; idx = 0; flow = 0;
+    for(int i = 0;i < m; i ++)
+    {
+        int a, b, c;
+        scanf("%d%d%d", &a, &b, &c);
+        add(a, b, c);
+        add(b, a, 0);
     }
-    cout<<EK();
-    return 0;
+    while(bfs()) update();
+    cout << flow << endl;
 }
 ```
 
-<p>别人的答案</p>
+</br>
+
+## Dinic
+
+</br>
+
+<p></p>
 
 </br>
 
