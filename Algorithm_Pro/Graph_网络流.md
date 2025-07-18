@@ -224,7 +224,110 @@ int main()
 
 </br>
 
-<p></p>
+<p>由于 Edmonds-Karp 算法每轮可能遍历整个残量网络，但只能找到一条增广路，对此有优化空间。</p>
+
+<p>引入节点的层次层次这一概念，d[x] 代表 s 到 x 最少需要经过的边数。在残量网络中，满足 d[y] = d[x] + 1 的边 (x, y) 构成的子图被称为分层图（显然是一张有向无环图）。</p>
+
+<p>Dinic 算法不断重复以下步骤，直到在残量网络中 S 不能达到 T</p>
+
+1. 在残量网络上 BFS 求出节点的层次，构造分层图
+
+2. 在分层图上 DFS 寻找增广路，在回溯时实时更新剩余容量。另外，每条节点可以流向多条出边，同时还加入了若干剪枝。
+
+<p>Dinic 算法时间复杂度为 O(n^2 m)，实际上远远达不到这个上界，一般能处理 10^4 ~ 10^5 规模的网络</p>
+
+<p>特别的，Dinic 求解，二分图最大匹配的时间复杂度为 O(m sqrt(n))</p>
+
+```
+#include <iostream>
+#include <queue>
+#include <cstring>
+
+using namespace std;
+
+const int INF = 1 << 29, N = 50010, M = 300010;
+
+int idx, h[N], e[M], ne[M], w[M];
+
+int d[N], now[M];
+
+int n, m, s, t, flow;
+
+void add(int a, int b, int c)
+{
+    e[idx] = b, ne[idx] = h[a], w[idx] = c, h[a] = idx ++;
+}
+
+bool bfs()
+{
+    memset(d, 0, sizeof d);
+
+    queue<int> q;
+    q.push(s);
+    d[s] = 1;
+    now[s] = h[s];
+
+    while(!q.empty())
+    {
+        int x = q.front();
+        q.pop();
+
+        for(int i = h[x]; i != -1; i = ne[i])
+        {
+            int y = e[i];
+            if(w[i] && !d[y])
+            {
+                q.push(y);
+                now[y] = h[y];
+                d[y] = d[x] + 1;
+                if(e[i] == t) return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+int dinic(int x, int f)
+{
+    if(x == t) return f;
+    int rest = f, k;
+
+    for(int i = now[x]; i != -1 && rest; i = ne[i])
+    {
+        int y = e[i];
+        now[x] = i; // 当前弧优化，避免重复遍历从 x 出发不可扩展的边
+        if(w[i] && d[y] == d[x] + 1)
+        {
+            k = dinic(y, min(rest, w[i]));
+            if(!k)  d[y] = 0; // 剪枝，去掉增广完的点
+            w[i] -= k;
+            w[i^1] += k;
+            rest -= k;
+        }
+    }
+    return f - rest;
+}
+
+int main()
+{
+    memset(h, -1, sizeof h);
+
+    cin >> n >> m;
+    s = 1, t = n;
+
+    for(int i = 0; i < m; i ++)
+    {
+        int a, b, c;
+        scanf("%d%d%d", &a, &b, &c);
+        add(a, b, c), add(b, a, 0);
+    }
+
+    int f = 0;
+    while(bfs())
+        while(f = dinic(s, INF)) flow += f;
+    cout << flow;
+}
+```
 
 </br>
 
