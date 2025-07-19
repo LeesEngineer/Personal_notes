@@ -324,7 +324,7 @@ int main()
 
     int f = 0;
     while(bfs())
-        while(f = dinic(s, INF)) flow += f;
+        while(f = dinic(s, INF)) flow += f; // 要在一个分层图上榨干它所有的增广潜力，然后再去构建下一个分层图。
     cout << flow;
 }
 ```
