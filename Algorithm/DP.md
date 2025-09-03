@@ -871,6 +871,56 @@ int main()
 
 <p>动态规划问题记录方案其实就是把我们的状态转移存下来就行了。</p>
 
+<b>LCS 转 LIS 的一道题</b>
+
+<img width="1634" height="1138" alt="QQ_1756891048475" src="https://github.com/user-attachments/assets/e92fb468-e044-497d-868c-9739866e08b6" />
+
+```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N = 1e6 + 10;
+
+int a[N], b[N], c[N];
+int p[N], f[N];
+
+int main()
+{
+    int n;
+    cin >> n;
+    
+    memset(p, -1, sizeof p);
+    
+    for(int i = 0; i < n; i ++) cin >> a[i];
+    for(int i = 0; i < n; i ++) cin >> b[i];
+    for(int i = 0; i < n; i ++) p[a[i]] = i;
+    
+    int cnt = 0;
+    for(int i = 0; i < n; i ++) 
+    {
+        if(p[b[i]] != -1)
+        {
+            c[cnt] = p[b[i]]; // important
+            cnt ++;
+        }
+    }
+    
+    for(int i = 0; i < n; i ++)
+        for(int j = 0; j < i; j ++)
+            if(c[i] > c[j])
+                 f[i] = max(f[i], f[j] + 1);
+                 
+    int res = 0;
+    for(int i = 0; i < n; i ++)
+        res = max(res, f[i]);
+        
+    cout << res + 1;
+}
+```
+
 </br>
 
 ## 最长公共子序列
