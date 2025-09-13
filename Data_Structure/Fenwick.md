@@ -97,7 +97,7 @@ c[12] = c[10] + c[11] + a[12]
 // 修改
 for(int i = x; i <= n; i += lowbit(i)) tr[i] += c // n 为区间最大范围
 // 查询
-for(int i = x; i; i -= lowbit(i)) res += tr[i];
+for(int i = x; i; i -= lowbit(i)) res += tr[i]; 
 ```
 
 
