@@ -100,6 +100,18 @@ for(int i = x; i <= n; i += lowbit(i)) tr[i] += c // n 为区间最大范围
 for(int i = x; i; i -= lowbit(i)) res += tr[i]; 
 ```
 
+</br>
+
+# 例题
+
+</br>
+
+## 楼兰图腾
+
+</br>
+
+<p></p>
+
 
 
 
