@@ -110,7 +110,31 @@ for(int i = x; i; i -= lowbit(i)) res += tr[i];
 
 </br>
 
-<p></p>
+```
+{
+    cin >> n;
+    for(int i = 1; i <= n; i ++) cin >> a[i];
+    
+    for(int i = 1; i <= n; i ++)
+    {
+        int y = a[i];
+        Greater[i] = sum(n) - sum(y);
+        lower[i] = sum(y - 1);
+        add(y, 1);
+    }
+    memset(tr, 0, sizeof tr);
+    long long res1 = 0, res2 = 0;
+    for(int i = n; i; i --)
+    {
+        int y = a[i];
+        res1 += Greater[i] * (long long) (sum(n) - sum(y));
+        res2 += lower[i] * (long long) sum(y - 1);
+        add(y, 1);
+    }
+    
+    cout << res1 << " " << res2;
+}
+```
 
 
 
