@@ -217,27 +217,119 @@ int main()
 
 </br>
 
-## 扩展--差分
+## 差分 -- 一个简单的整数问题
 
 </br>
 
-<p></p>
+```
+a[] => b[]
+[L, R] + c
+b[L] += c, b[R + 1] -= c
+```
+
+<p>在原数组上更新区间值，等价于在差分数组上更新两个点的值。求原数组的一个值等价于求差分数组的前缀和，在用树状数组求前缀和</p>
+
+```
+#include <iostream>
+
+using namespace std;
+
+const int N = 1e5 + 10;
+int a[N], b[N], tr[N];
+int n;
+
+int lowbit(int x)
+{
+    return x & -x;
+}
+void add(int x, int c)
+{
+    for(int i = x; i <= n; i += lowbit(i)) tr[i] += c;
+}
+long long sum(int x)
+{
+    long long res = 0;
+    for(int i = x; i; i -= lowbit(i)) res += (long long)tr[i];
+    return res;
+}
+
+int main()
+{
+    int m;
+    cin >> n >> m;
+    for(int i = 1; i <= n; i ++) cin >> a[i];
+    for(int i = 1; i <= n; i ++) b[i] = a[i] - a[i - 1];
+    
+    for(int i = 1; i <= n; i ++) add(i, b[i]);
+    
+    while(m --)
+    {
+        char q;
+        cin >> q;
+        if(q == 'Q')
+        {
+            int x;
+            cin >> x;
+            long long res = sum(x);
+            cout << res << endl;
+        }
+        else
+        {
+            int l, r, c;
+            cin >> l >> r >> c;
+            add(l, c), add(r + 1, -c);
+        }
+    }
+}
+```
 
 </br>
 
-## 扩展--查分+公式
+## 差分+公式 -- 一个简单的整数问题2
 
 </br>
 
-<p></p>
+<p>更新操作同上，主要是求区间和，转换成求前缀和，只要能求出前缀和就能求出任意区间和</p>
+
+```
+a1 + ... + ax
+=>
+b1
+b1 b2
+b1 b2 b3
+.
+.
+.
+b1 b2 b3 ... bx
+```
+
+<p>将其补齐改为：</p>
+
+```
+b1 b2 b3 ... bx
+---
+b1|b2 b3 ... bx
+b1 b2|b3 ... bx
+b1 b2 b3|... bx
+.
+.
+.
+b1 b2 b3 ... bx
+```
+
+<p>整体就变成：</p>
+
+`(b1 + b2 + b3 + ... + bx) * (x + 1) - (b1 + 2 * b2 + 3 * b3 + ... + x * bx) // i * bi`
+
+<p>会发现后面也是一个前缀和，bi 的前缀和以及 i*bi 的前缀和。所以操作的时候只需要维护两个前缀和就可以了</p>
 
 </br>
 
-# 例题
+# 例题 -- 谜一样的牛
 
 </br>
 
-<p></p>
+<p>这题还可以用平衡树来做</p>
 
 
 
