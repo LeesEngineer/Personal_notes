@@ -102,6 +102,35 @@ for(int i = x; i; i -= lowbit(i)) res += tr[i];
 
 </br>
 
+## 树状数组的初始化
+
+</br>
+
+<p>讨论提供一个现有数组，如何初始化为树状数组</p>
+
+```
+// 朴素方法 O(nlogn)
+for(int i = 1; i = n; i ++) add(i, a[i]);
+// 类似于堆的建立方式，除非是很卡时 O(n)
+for(int x = 1;x <= n;x ++)
+    for(int i = x - 1;i >= x - lowbit(x) + 1;i -= lowbit(i))
+         tr[x] += tr[i];
+```
+
+```
+// y总写的，不过是错的，因为tr[i]指的区间是[x-lowbit(x)+ 1,x]而不是前缀和
+for(int x = 1;x <= n;x ++)
+    for(int i= x - 1;i;i -=lowbit(i))
+         tr[x] += tr[i];
+```
+
+```
+// 还有一种更为简单的建立树状数组的方式且为 O(n)，直接先求前缀和在求区间和
+c[x] = s[x] - s[x - lowbit(x)]
+```
+
+</br>
+
 # 例题
 
 </br>
