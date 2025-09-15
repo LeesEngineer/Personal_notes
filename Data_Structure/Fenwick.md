@@ -111,6 +111,34 @@ for(int i = x; i; i -= lowbit(i)) res += tr[i];
 </br>
 
 ```
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+typedef long long LL;
+const int N = 2e5 + 10;
+int a[N], tr[N];
+LL Greater[N], lower[N];
+int n;
+
+int lowbit(int x)
+{
+    return x & -x;
+}
+
+void add(int x, int c)
+{
+    for(int i = x; i <= n; i += lowbit(i)) tr[i] += c;
+}
+
+int sum(int x)
+{
+    int res = 0;
+    for(int i = x; i; i -= lowbit(i)) res += tr[i];
+    return res;
+}
+
+int main()
 {
     cin >> n;
     for(int i = 1; i <= n; i ++) cin >> a[i];
@@ -123,15 +151,14 @@ for(int i = x; i; i -= lowbit(i)) res += tr[i];
         add(y, 1);
     }
     memset(tr, 0, sizeof tr);
-    long long res1 = 0, res2 = 0;
+    LL res1 = 0, res2 = 0;
     for(int i = n; i; i --)
     {
         int y = a[i];
-        res1 += Greater[i] * (long long) (sum(n) - sum(y));
-        res2 += lower[i] * (long long) sum(y - 1);
+        res1 += Greater[i] * (LL)(sum(n) - sum(y));
+        res2 += lower[i] * (LL)sum(y - 1);
         add(y, 1);
     }
-    
     cout << res1 << " " << res2;
 }
 ```
