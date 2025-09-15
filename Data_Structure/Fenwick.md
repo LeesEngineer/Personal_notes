@@ -331,6 +331,56 @@ b1 b2 b3 ... bx
 
 <p>这题还可以用平衡树来做</p>
 
+<p>树状数组加上二分查找左边界</p>
+
+```
+#include <iostream>
+
+using namespace std;
+
+const int N = 1e5 + 10;
+int a[N], n, tr[N], ans[N];
+
+int lowbit(int x)
+{
+    return x & -x;
+}
+int sum(int x)
+{
+    int res = 0;
+    for(int i = x; i; i -= lowbit(i)) res += tr[i];
+    return res;
+}
+void add(int x, int c)
+{
+    for(int i = x; i <= n; i += lowbit(i)) tr[i] += c;
+}
+
+int main()
+{
+    cin >> n;
+    for(int i = 2; i <= n; i ++) cin >> a[i];
+    
+    for(int i = 1; i <= n; i ++) add(i, 1);
+    
+    for(int i = n; i; i --)
+    {
+        int k = a[i] + 1;
+        
+        int l = 1, r = n;
+        while(l < r)
+        {
+            int mid = l + r >> 1;
+            if(sum(mid) >= k) r = mid;
+            else l = mid + 1;
+        }
+        ans[i] = l;
+        add(l, -1);
+    }
+    for(int i = 1; i <= n; i ++) cout << ans[i] << endl;
+}
+```
+
 
 
 
