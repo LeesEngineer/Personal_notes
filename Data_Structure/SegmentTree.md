@@ -22,17 +22,6 @@
 
 <p>build 传入当前区间编号，以及当前区间的左右端点</p>
 
-```
-void build(int u, int l, int r)
-{
-    tr[u].l = l, tr[u].r = r;
-    if(l == r) return; // 若当前为叶子节点直接返回即可
-    int mid = l + r >> 1;
-    build(u << 1, l, mid), build(u << 1 | 1, mid + 1, r);
-    pushup(u);
-}
-```
-
 </br>
 
 ## 查询
@@ -159,8 +148,17 @@ int main()
 }
 ```
 
+</br>
 
+### 例题--你能回答这些问题吗
 
+</br>
+
+<p>难点主要出现在 Node 节点应该存储那些信息，先考虑把答案算出来，在考虑当前信息能否把答案维护出来（tmax，lmax，rmax），在考虑该信息如何被维护是否要加新的信息（sum）</p>
+
+```
+
+```
 
 
 
