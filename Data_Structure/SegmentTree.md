@@ -73,9 +73,91 @@ void build(int u, int l, int r)
 
 <p>不涉及到延迟标记</p>
 
-<p></p>
+</br>
 
+### 例题--最大数
 
+</br>
+
+<p>只有之前前一次查询的结果，才能知道当前要插入的数是多少，所以这个问题只能用动态的方法来做</p>
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 2e5 + 10;
+
+struct Node
+{
+    int l, r;
+    int v;
+} tr[4 * N];
+
+int pushup(int u)
+{
+    tr[u].v = max(tr[u << 1].v, tr[u << 1 | 1].v);
+}
+void build(int u, int l, int r)
+{
+    tr[u].l = l, tr[u].r = r;
+    if(l == r) return;
+    
+    int mid = l + r >> 1;
+    build(u << 1, l, mid), build(u << 1 | 1, mid + 1, r);
+}
+int query(int u, int l, int r)
+{
+    if(l <= tr[u].l && r >= tr[u].l)
+        return tr[u].v;
+    
+    int mid = tr[u].l + tr[u].r >> 1;
+    int v = 0;
+    if(l <= mid) v = query(u << 1, l, r);
+    if(r > mid) v = max(v, query(u << 1 | 1, l, r));
+    
+    return v;
+}
+void modify(int u, int x, int v)
+{
+    if(tr[u].l == x && tr[u].r == x) tr[u].v = v;
+    else
+    {
+        int mid = tr[u].l + tr[u].r >> 1;
+        if(x <= mid) modify(u << 1, x, v);
+        else modify(u << 1 | 1, x, v);
+        
+        pushup(u);
+    }
+}
+
+int main()
+{
+    long long m, p;
+    cin >> m >> p;
+    
+    build(1, 1, m);
+    
+    char op;
+    long long k;
+    long long last = 0;
+    long long x = 0;
+    while(m --)
+    {
+        cin >> op >> k;
+        if(op == 'A')
+        {
+            modify(1, ++ x, (k + last) % p);
+        }
+        else
+        {
+            last = query(1, x - k + 1, x);
+            cout << last << endl;
+        }
+    }
+}
+```
 
 
 
