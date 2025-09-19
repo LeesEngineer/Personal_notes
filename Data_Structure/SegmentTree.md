@@ -257,16 +257,163 @@ int main()
 
 <p>平常涉及到区间操作应该使用延迟标记，但这里只涉及到了加上一个数，所以可以用差分来解决</p>
 
-<p>修改一个区间不如修改一个数 easy，</p>
+<p>因为修改一个区间不如修改一个数 easy，所以考虑用差分，让线段树维护差分的值</p>
+   
+<p>且根据碾转相除法，一定有等式</p>
+
+```
+gcd(x, y, z) = gcd(x, y-x, z-y)
+```
+
+<p>想求 [l, r] 的公因数，可以分开求</p>
+
+`gcd(a[l], gcd(b[l+1], b[r]))`
+
+<p>右边很好维护，很好求</p>
+
+<p>单点查询就相当于求前缀和（可以用树状数组）。把问题转换成了单点修改区间查询</p>
+
+```
+#include<bits/stdc++.h>
 
 
+using namespace std;
+typedef long long ll;
 
+const int N = 5e5 + 10;
 
+ll w[N];
+struct Node
+{
+    int l, r;
+    ll sum, d;
+} tr[N * 4];
 
+ll gcd(ll a, ll b)
+{
+    return b ? gcd(b, a % b) : a;
+}
 
+void pushup(Node &u, Node &l, Node &r)
+{
+    u.sum = l.sum + r.sum;
+    u.d = gcd(l.d, r.d);
+}
+void pushup(int u)
+{
+    pushup(tr[u], tr[u << 1], tr[u << 1 | 1]);
+}
+void build(int u, int l, int r)
+{
+    if(l == r)
+    {
+        ll b = w[l] - w[l - 1];
+        tr[u] = {l, r, b, b};
+    }
+    else
+    {
+        tr[u].l = l, tr[u].r = r;
+        int mid = l + r >> 1;
+        build(u << 1, l, mid), build(u << 1 | 1, mid + 1, r);
+        pushup(u);
+    }
+}
+void modify(int u, int x, ll c)
+{
+    if(tr[u].l == tr[u].r)
+    {
+        ll b = tr[u].sum;
+        tr[u] = {x, x, b + c, b + c};
+    }
+    else
+    {
+        int mid = tr[u].l + tr[u].r >> 1;
+        if(x <= mid) modify(u << 1, x, c);
+        else modify(u << 1 | 1, x, c);
+        pushup(u);
+    }
+}
+Node query(int u, int l, int r)
+{
+    if(l <= tr[u].l && r >= tr[u].r) return tr[u];
+    
+    int mid = tr[u].l + tr[u].r >> 1;
+    if(r <= mid) return query(u << 1, l, r);
+    else if(l > mid) return query(u << 1 | 1, l, r);
+    else
+    {
+        Node left, right;
+        left = query(u << 1, l, r);
+        right = query(u << 1 | 1, l, r);
+        Node t;
+        pushup(t, left, right);
+        return t;
+    }
+}
 
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    for(int i = 1; i <= n; i ++) cin >> w[i];
+    
+    build(1, 1, n);
+    
+    char op;
+    int l, r;
+    ll d;
+    while(m --)
+    {
+        cin >> op >> l >> r;
+        if(op == 'C')
+        {
+            cin >> d;
+            modify(1, l, d);
+            if(r + 1 <= n) modify(1, r + 1, -d);
+        }
+        else
+        {
+            ll x = query(1, 1, l).sum;
+            ll y;
+            if (l + 1 <= r) y = query(1,l + 1,r).d;
+            else y = 0;
+            cout << abs(gcd(x, y)) << endl;
+        }
+    }
+}
+```
 
+<p>折磨人，边界问题 debug 了一个点</p>
 
+</br>
+
+# 懒标记 lazy tags
+
+</br>
+
+<p>pushdown 把父节点的修改向下传播到子节点，源于区间查询</p>
+
+<p>单点修改妥妥 logn。如果用区间修改最坏情况下是修改全部区间为 O(4n)=O(n)</p>
+
+<p>懒标记的含义是“给以当前节点为根的子树中的每一个节点加上 add（不包含根节点。也可以加，只要保持前后一致就可以了）”</p>
+
+<p>对于了懒标记，在从上向下递归的过程当中，如果需要递归一个区间的子区间的话，那就清空当前的标记并且传到两个儿子上。这样就可以保证，所有访问到的节点，他上面所有父节点上的标记都被累加到当前节点上。<b>所以查询的时候加上 pushdown 就可以了</b></p>
+
+```
+left.add += root.add; left.sum += (left.r - left.l + 1) * root.add;
+right.add += root.add; right.sum += (right.r - right.l + 1) * root.add
+root.add = 0;
+```
+
+<p>修改的时候也要做这样的操作，避免分歧</p>
+
+</br>
+
+# 扫描线法
+
+</br>
+
+<p></p>
 
 
 
