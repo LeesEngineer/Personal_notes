@@ -251,7 +251,7 @@ int main()
 
 </br>
 
-## 例题--_区间最大公约数
+## 例题--区间最大公约数
 
 </br>
 
@@ -405,9 +405,126 @@ right.add += root.add; right.sum += (right.r - right.l + 1) * root.add
 root.add = 0;
 ```
 
-<p>修改的时候也要做这样的操作，避免分歧</p>
+<p>修改的时候也要做这样的操作，避免分歧。当前的区间添加的标记不能再表示当前的区间的一个统一的标记了，操作完可能左边加十右边加十五</p>
+
+<p><b>在回溯时 pushup，在分裂传递懒标记时 pushdown</b></p>
 
 </br>
+
+## 例题--一个简单的整数问题
+
+</br>
+
+<p>要维护的信息</p>
+
+```
+sum: 如果考虑当前节点及子节点上的所有标记（没有所有祖宗节点上的标记），当前区间和是多少
+add: 给当前区间的所有儿子加上 add
+```
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 1e5 + 10;
+typedef long long ll;
+
+int w[N];
+struct Node
+{
+    int l, r;
+    ll sum, add;
+} tr[N * 4];
+
+void pushup(int u)
+{
+    tr[u].sum = tr[u << 1].sum + tr[u << 1 | 1].sum;
+}
+void pushdown(int u)
+{
+    auto &root = tr[u], &l = tr[u << 1], &r = tr[u << 1 | 1];
+    l.add += root.add, l.sum += (ll) (l.r - l.l + 1) * (root.add);
+    r.add += root.add, r.sum += (ll) (r.r - r.l + 1) * (root.add);
+    root.add = 0;
+}
+void build(int u, int l, int r)
+{
+    if(l == r)
+        tr[u] = {l, r, w[l], 0};
+    else
+    {
+        tr[u] = {l, r};
+        int mid = l + r >> 1;
+        build(u << 1, l, mid), build(u << 1 | 1, mid + 1, r);
+        pushup(u);
+    }
+}
+void modify(int u, int l, int r, ll d)
+{
+    if(l <= tr[u].l && r >= tr[u].r)
+    {
+        tr[u].add += d;
+        tr[u].sum += (ll) (tr[u].r - tr[u].l + 1) * d;
+    }
+    else
+    {
+        pushdown(u);
+        int mid = tr[u].l + tr[u].r >> 1;
+        if(l <= mid) modify(u << 1, l, r, d);
+        if(r > mid) modify(u << 1 | 1, l, r, d);
+        pushup(u);
+    }
+}
+ll query(int u, int l, int r)
+{
+    if(l <= tr[u].l && r >= tr[u].r)
+        return tr[u].sum;
+    
+    pushdown(u);    
+    int mid = tr[u].l + tr[u].r >> 1;
+    ll sum = 0;
+    if(l <= mid) sum += query(u << 1, l, r);
+    if(r > mid) sum += query(u << 1 | 1, l, r);
+    
+    return sum;
+}
+
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    for(int i = 1; i <= n; i ++) cin >> w[i];
+    
+    build(1, 1, n);
+    
+    char op[2];
+    int l, r, d;
+    while(m --)
+    {
+        scanf("%s%d%d", op, &l, &r);
+        if(*op == 'Q')
+        {
+            cout << query(1, l, r) << endl;
+        }
+        else
+        {
+            scanf("%d", &d);
+            modify(1, l, r, d);
+        }
+    }
+    return 0;
+}
+```
+
+</br>
+
+## 例题--亚特兰蒂斯
+
+</br>
+
+<p></p>
 
 # 扫描线法
 
