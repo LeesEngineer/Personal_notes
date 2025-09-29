@@ -7,7 +7,7 @@
 <p>有两个模板，适用于不同的情况</p>
 
 ```
-//区间[l, r]被划分为[l, mid]和[mid + 1, r]
+//区间[l, r]被划分为[l, mid]和[mid + 1, r]，找左边界
 int binary_1(int l, int r);
 {
     while(l < r)
@@ -21,7 +21,7 @@ int binary_1(int l, int r);
 ```
 
 ```
-//区间[l, r]被划分为[l, mid - 1]和[mid, r]
+//区间[l, r]被划分为[l, mid - 1]和[mid, r]，找右边界
 int binary_2(int l, int r)
 {
     while(l < r)
