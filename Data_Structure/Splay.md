@@ -159,7 +159,7 @@ void insert(int v)
     int u = root, p = 0;
     while(u) p = u, u = tr[u].s[v > tr[u].v];
     u = ++ idx;
-    if(p) tr[p].s[v > tr[p].v] = u;
+    tr[p].s[v > tr[p].v] = u;
     tr[u].init(v, p);
     splay(u, 0);
 }
