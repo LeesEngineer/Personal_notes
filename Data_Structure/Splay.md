@@ -90,6 +90,8 @@ swap(root->left, root->right)
 </br>
 
 <p>Splay 做的时候习惯加上两个哨兵，因为操作时会用到 l-1 和 r+1，为了防止越界加入 0 和 n+1</p>
+
+<p>加入 0 哨兵后，splay 平衡树的根上会有一个假根（和竞赛树一样）</p>
  
 ```
 #include <iostream>
