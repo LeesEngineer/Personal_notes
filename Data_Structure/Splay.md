@@ -101,7 +101,6 @@ using namespace std;
 
 const int N = 1e5 + 10;
 
-int n, m;
 struct Node
 {
     int s[2], p, v;
@@ -114,6 +113,7 @@ struct Node
     }
 } tr[N];
 int root, idx;
+int n, m;
 
 void pushup(int x)
 {
@@ -124,16 +124,9 @@ void pushdown(int x)
     if(tr[x].flag)
     {
         swap(tr[x].s[0], tr[x].s[1]);
-        tr[tr[x].s[0]].flag ^= 1, tr[tr[x].s[1]].flag ^= 1;
+        tr[tr[x].s[1]].flag ^= 1, tr[tr[x].s[0]].flag ^= 1;
         tr[x].flag = 0;
     }
-}
-void output(int u)
-{
-    pushdown(u);
-    if(tr[u].s[0]) output(tr[u].s[0]);
-    if(tr[u].v >= 1 && tr[u].v <= n) cout << tr[u].v << " ";
-    if(tr[u].s[1]) output(tr[u].s[1]);
 }
 void rotate(int x)
 {
@@ -142,16 +135,19 @@ void rotate(int x)
     tr[z].s[tr[z].s[1] == y] = x, tr[x].p = z;
     tr[y].s[k] = tr[x].s[k ^ 1], tr[tr[x].s[k ^ 1]].p = y;
     tr[x].s[k ^ 1] = y, tr[y].p = x;
-    pushup(y), pushup(x); // z 不变
+    pushup(y), pushup(x);
 }
 void splay(int x, int k)
 {
     while(tr[x].p != k)
     {
         int y = tr[x].p, z = tr[y].p;
+        
         if(z != k)
-            if((tr[y].s[1] == x) ^ (tr[z].s[1] == y)) rotate(x); // 判断直线关系
-            else rotate(y);
+            if((tr[z].s[1] == y) ^ (tr[y].s[1] == x))
+                rotate(x);
+            else
+                rotate(y);
         rotate(x);
     }
     if(!k) root = x;
@@ -159,14 +155,22 @@ void splay(int x, int k)
 void insert(int v)
 {
     int u = root, p = 0;
+    
     while(u) p = u, u = tr[u].s[v > tr[u].v];
-    u = ++ idx;
+    
+    u = ++idx;
     tr[p].s[v > tr[p].v] = u;
     tr[u].init(v, p);
     splay(u, 0);
 }
-
-int get_k(int k)
+int get_k1(int u, int k)
+{  
+    pushdown(u);
+    if(tr[tr[u].s[0]].size >= k) return get_k1(tr[u].s[0], k);
+    else if(tr[tr[u].s[0]].size + 1 == k) return u;
+    else return get_k1(tr[u].s[1], k - tr[tr[u].s[0]].size - 1);
+}
+int get_k2(int k)
 {
     int u = root;
     while(true)
@@ -178,23 +182,29 @@ int get_k(int k)
     }
     return -1;
 }
-
+void output(int u)
+{
+    pushdown(u);
+    if(tr[u].s[0]) output(tr[u].s[0]);
+    if(tr[u].v >= 1 && tr[u].v <= n) printf("%d ", tr[u].v);
+    if(tr[u].s[1]) output(tr[u].s[1]);
+}
 int main()
 {
-    cin >> n >> m;
+    scanf("%d%d", &n, &m);
+    
     for(int i = 0; i <= n + 1; i ++) insert(i);
     
+    int l, r;
     while(m --)
     {
-        int l, r;
-        cin >> l >> r;
-        l = get_k(l), r = get_k(r + 2);
+        scanf("%d%d", &l , &r);
+        
+        l = get_k1(root, l), r = get_k1(root, r + 2);
         splay(l, 0), splay(r, l);
         tr[tr[r].s[0]].flag ^= 1;
     }
     output(root);
-    
-    return 0;
 }
 
 ```
