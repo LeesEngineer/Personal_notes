@@ -83,6 +83,8 @@ swap(root->left, root->right)
 
 <p>区分 spaly 和 二叉搜索树，没有左子树关键字都比当前关键字小，右子树关键字都比当前关键字大的概念。一开始可能有，但是只要翻转后就不保证这样的性质了。因为 splay 只保证中序遍历的顺序是所要求序列的顺序</p>
 
+<p>Splay 的翻转操作是不保序的，但是默认存在一个拓扑序</p>
+
 </br>
 
 # 例题--Splay
@@ -206,17 +208,43 @@ int main()
     }
     output(root);
 }
-
 ```
 
+<p>容易产生误区的地方是 get_k 是找位置为 k 的值，而不是第 k 大的值</p>
 
+```
+void insert(int v)
+{
+    int u = root, p = 0;
+    
+    while(u) p = u, u = tr[u].s[v > tr[u].v];
+    
+    u = ++idx;
+    tr[p].s[v > tr[p].v] = u;
+    tr[u].init(v, p);
+    pushup(p);
+    splay(u, 0);
+}
+```
 
+<p>insert 函数不需要加上 pushup，因为这不是向上递归的计算 size，会导致后续的 size 计算错误</p>
 
+```
+void insert(int v)
+{
+    int u = root, p = 0;
+    
+    while(u) p = u, u = tr[u].s[v > tr[u].v];
+    
+    u = ++idx;
+    tr[p].s[v > tr[p].v] = u;
+    tr[u].init(v, p);
+    pushup(p);
+    splay(u, 0);
+}
+```
 
-
-
-
-
+<p>否则会让 get_k 函数进入错误的分支，get_k1 爆栈，让 get_k2 超时</p>
 
 
 
