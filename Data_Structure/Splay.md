@@ -246,8 +246,132 @@ void insert(int v)
 
 <p>否则会让 get_k 函数进入错误的分支，get_k1 爆栈，让 get_k2 超时</p>
 
+</br>
 
+# 例题--郁闷的出纳员
 
+</br>
+
+<p>没用到 pushdown 操作</p>
+
+<P>1. 在 get 函数这里卡了好久。2. 忘了删除后的 pushup 操作</P>
+
+```
+#include <iostream>
+
+using namespace std;
+
+const int N = 1e5 + 10, INF = 1e9;
+
+struct Node
+{
+    int s[2], p, v;
+    int size;
+    
+    void init(int _v, int _p)
+    {
+        v = _v, p = _p;
+        size = 1;
+    }
+} tr[N];
+int root, idx;
+int delta, tot;
+
+void pushup(int x)
+{
+    tr[x].size = tr[tr[x].s[0]].size + tr[tr[x].s[1]].size + 1;
+}
+void rotate(int x)
+{
+    int y = tr[x].p, z = tr[y].p;
+    int k = (tr[y].s[1] == x);
+    
+    tr[z].s[tr[z].s[1] == y] = x, tr[x].p = z;
+    tr[y].s[k] = tr[x].s[k ^ 1], tr[tr[x].s[k ^ 1]].p = y;
+    tr[x].s[k ^ 1] = y, tr[y].p = x;
+    pushup(y), pushup(x);
+}
+void splay(int x, int k)
+{
+    while(tr[x].p != k)
+    {
+        int y = tr[x].p, z = tr[y].p;
+        if(z != k)
+            if((tr[z].s[1] == y) ^ (tr[y].s[1] == x))
+                rotate(x);
+            else
+                rotate(y);
+        rotate(x);
+    }
+    if(!k) root = x;
+}
+int insert(int v)
+{
+    int u = root, p = 0;
+    
+    while(u) p = u, u = tr[u].s[v > tr[u].v]; // 这里用了 >=
+    
+    u = ++ idx;
+    tr[p].s[v > tr[p].v] = u;
+    tr[u].init(v, p);
+    splay(u, 0);
+    
+    return u;
+}
+int get_k(int u, int k)
+{
+    if(tr[tr[u].s[0]].size >= k) return get_k(tr[u].s[0], k);
+    else if(tr[tr[u].s[0]].size + 1 == k) return u;
+    else return get_k(tr[u].s[1], k - tr[tr[u].s[0]].size - 1);
+}
+int get(int k)
+{
+    int res, u = root;
+    while(u)
+    {
+        if(tr[u].v < k) u = tr[u].s[1];
+        else res = u, u = tr[u].s[0];
+    }
+    return res;
+}
+int main()
+{
+    int n, m;
+    scanf("%d%d", &n, &m);
+    
+    int L = insert(-INF), R = insert(INF);
+    
+    char op[2];
+    int k;
+    while(n --)
+    {
+        scanf("%s%d", op, &k);
+        
+        if(*op == 'I')
+        {
+            if(k >= m) insert(k - delta), tot ++;
+        }
+        else if(*op == 'A')
+        {
+            delta += k;
+        }
+        else if(*op == 'S')
+        {
+            delta -= k;
+            R = get(m - delta);
+            splay(R, 0), splay(L, R);
+            tr[L].s[1] = 0;
+            pushup(L), pushup(R); // 别忘了
+        }
+        else
+        {
+            if(tr[root].size - 2 < k) printf("-1\n");
+            else printf("%d\n", tr[get_k(root, tr[root].size - k)].v + delta);
+        }
+    }
+    printf("%d\n", tot - (tr[root].size - 2));
+}
+```
 
 
 
