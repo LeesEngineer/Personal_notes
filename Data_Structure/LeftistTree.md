@@ -57,11 +57,108 @@ Node* merge(Node* a, Node* b) {
 
 </br>
 
-```
+<p>因为并查集不支持删除操作，所以会用到换根操作，另原根指向新根，新根指向自己</p>
 
 ```
+#include <iostream>
 
+using namespace std;
 
+const int N = 2e5 + 10;
+
+int n, idx;
+
+struct Node
+{
+    int l, r;
+    int v, dist, id;
+    
+    void init(int _v, int _dist, int _id)
+    {
+        v = _v, dist = _dist, id = _id;
+    }
+    
+    bool operator<(const Node &w)
+    {
+        return v != w.v ? v < w.v : id < w.id;
+    }
+} tr[N];
+
+int merge(int x, int y)
+{
+    if(!x || !y) return x + y;
+    
+    if(tr[y] < tr[x]) swap(x, y);
+    tr[x].r = merge(tr[x].r, y);
+    if(tr[tr[x].r].dist > tr[tr[x].l].dist) swap(tr[x].l, tr[x].r);
+    tr[x].dist = tr[tr[x].r].dist + 1;
+    return x;
+}
+
+int p[N];
+
+int find(int x)
+{
+    if(x != p[x]) p[x] = find(p[x]);
+    return p[x];
+}
+
+int main()
+{
+    scanf("%d", &n);
+    tr[0].init((int)2e9, 0, 0);
+    int op;
+    while(n --)
+    {
+        scanf("%d", &op);
+        if(op == 1)
+        {
+            int v;
+            scanf("%d", &v);
+            idx ++;
+            p[idx] = idx;
+            tr[idx].init(v, 1, idx);
+        }
+        else if(op == 2)
+        {
+            int x, y;
+            scanf("%d%d", &x, &y);
+            x = find(x), y = find(y);
+            if(x != y)
+            {
+                if(tr[y] < tr[x]) swap(x, y);
+                merge(x, y);
+                p[y] = x;
+            }
+        }
+        else if(op == 3)
+        {
+            int x;
+            scanf("%d", &x);
+            x = find(x);
+            printf("%d\n", tr[x].v);
+        }
+        else
+        {
+            int x;
+            scanf("%d", &x);
+            x = find(x);
+            int l = tr[x].l, r = tr[x].r;
+            if(tr[r] < tr[l]) swap(l, r);
+            merge(l, r);
+            p[x] = l, p[l] = l;
+        }
+    }
+}
+```
+
+<p>卡了好久，在合并操作时，没加上 `if (x != y)` 判断</p>
+
+</br>
+
+# 
+
+</br>
 
 
 
