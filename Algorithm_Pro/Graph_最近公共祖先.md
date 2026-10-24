@@ -139,6 +139,106 @@ int main()
 
 合并两个集合可以用并查集
 
+```
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+
+using namespace std;
+
+const int N = 20010, M = N << 2;
+typedef pair<int, int> PII;
+
+int n, m;
+int h[N], e[M], ne[M], w[M], idx;
+int p[N];
+int res[N];
+int st[N];
+int dist[N];
+vector<PII> query[N];
+
+void add(int a, int b, int c)
+{
+    e[idx] = b, ne[idx] = h[a], w[idx] = c, h[a] = idx ++; 
+}
+
+int find(int x)
+{
+    if(x != p[x]) p[x] = find(p[x]);
+    return p[x];
+}
+
+void dfs(int u, int fa)
+{
+    for(int i = h[u]; i != -1; i = ne[i])
+    {
+        int j = e[i];
+        if(j == fa) continue;
+        dist[j] = dist[u] + w[i];
+        dfs(j, u);
+    }
+}
+
+void tarjan(int u)
+{
+    st[u] = 1;
+    for(int i = h[u]; i != -1; i = ne[i])
+    {
+        int j = e[i];
+        if(!st[j])
+        {
+            tarjan(j);
+            p[j] = u;
+        }
+    }
+    
+    for(auto item : query[u])
+    {
+        int y = item.first, id = item.second;
+        if(st[y] == 2)
+        {
+            int anc = find(y);
+            res[id] = dist[u] + dist[y] - dist[anc] * 2;
+        }
+    }
+    
+    st[u] = 2;
+}
+
+int main()
+{
+    cin >> n >> m;
+    memset(h, -1, sizeof h);
+    for(int i = 0; i < n - 1; i ++)
+    {
+        int a, b, c;
+        cin >> a >> b >> c;
+        add(a, b, c), add(b, a, c);
+    }
+    for(int i = 0; i < m; i ++)
+    {
+        int a, b;
+        cin >> a >> b;
+        if(a != b)
+        {
+            query[a].push_back({b, i});
+            query[b].push_back({a, i});
+        }
+    }
+    
+    for(int i = 1; i <= n; i ++) p[i] = i;
+    
+    dfs(1, -1);
+    tarjan(1); // 随便拿一个点当根结点就可以了
+    
+    for(int i = 0; i < m; i ++) cout << res[i] << endl;
+    
+    return 0;
+}
+```
+
 
 
 
