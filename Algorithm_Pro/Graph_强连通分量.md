@@ -77,9 +77,11 @@ void tarjan(int u)
 }
 ```
 
-O(n + m)
+每个点只遍历一次，所以是线性的，O(n + m)
 
 <b>Tarjan 算法中的栈保存的是：已经被 DFS 访问过，但尚未被确定归属于某个 SCC 的节点。</b>且因为横叉边的存在，不单单只存路径上的值
+
+stack 存的是当前强连通分量内还没有搜完的点
 
 <b>如果一个点仍在 Tarjan 栈中，说明它所属的 SCC 尚未被完整弹出。整个 SCC 弹出栈的顺序是逆拓扑序的</b>
 
@@ -95,6 +97,119 @@ else if(in_stk[j])
 是因为 dfn 和 low 是严格按照 DFS 顺序的
 
 <hr>
+
+# 缩点
+
+遍历所有点，遍历其所有邻点，如果 i 和 j 不在同一个强连通分量之中则加一条新边。
+
+之后会变成一个<b>有向无环图(DAG)</b>，不需要再求一遍拓扑序。<b>所有缩点之后的连通分量，按照 SCC 节点编号的递减的顺序已经是拓扑序了</b>
+
+# 受欢迎的牛
+
+朴素做法是 O(n(n+m)) 
+
+不需要真的把缩完点的图建出来，只需要枚举每条边统计每个点的出度就可以了
+
+```
+#include <iostream>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 10010, M = 50010;
+
+int n, m;
+int h[N], e[M], ne[M], idx;
+int dfn[N], low[N], timestamp;
+int stk[N], top;
+bool in_stk[N];
+int id[N], scc_cnt, sz[N];
+int dout[N];
+
+void add(int a, int b)
+{
+    e[idx] = b, ne[idx] = h[a], h[a] = idx ++;
+}
+
+void tarjan(int u)
+{
+    dfn[u] = low[u] = ++ timestamp;
+    stk[++ top] = u, in_stk[u] = true;
+    
+    for(int i = h[u]; i != -1; i = ne[i])
+    {
+        int j = e[i];
+        if(!dfn[j])
+        {
+            tarjan(j);
+            low[u] = min(low[u], low[j]);
+        }
+        else if(in_stk[j])
+            low[u] = min(low[u], dfn[j]);
+    }
+    
+    if(low[u] == dfn[u])
+    {
+        int y;
+        ++ scc_cnt;
+        do
+        {
+            y = stk[top --];
+            in_stk[y] = false;
+            id[y] = scc_cnt;
+            sz[scc_cnt] ++;
+        }
+        while(y != u);
+    }
+}
+
+int main()
+{
+    cin >> n >> m;
+    memset(h, -1, sizeof h);
+    while(m --)
+    {
+        int a, b;
+        cin >> a >> b;
+        add(a, b);
+    }
+    
+    for(int i = 1; i <= n; i ++)
+        if(!dfn[i])
+            tarjan(i);
+            
+    for(int i = 1; i <= n; i ++)
+        for(int j = h[i]; j != -1; j = ne[j])
+        {
+            int k = e[j];
+            int a = id[i], b = id[k];
+            if(a != b) dout[a] ++;
+        }
+        
+    int zeros = 0, sum = 0;
+    for(int i = 1; i <= scc_cnt; i ++)
+        if(!dout[i])
+        {
+            zeros ++;
+            sum += sz[i];
+            if(zeros > 1)
+            {
+                sum = 0;
+                break;
+            }
+        }
+    cout << sum;
+    
+    return 0;
+}
+```
+
+
+
+
+
 
 
 
