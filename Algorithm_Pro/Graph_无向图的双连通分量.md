@@ -143,6 +143,118 @@ int main()
 
 对无向图来说，最少加 (cnt + 1)/2 个边将其变为边双连通分量。
 
+<hr>
+
+# v-dcc
+
+当前有 x 到 y，判断 x 是否为割点，若有 low[y] >= dfn[x] 则分为两种情况：
+
+1. 如果 x 不是根节点，那么 x 就是割点
+
+2. 如果 x 是根节点，至少要有有第二个子节点 y_i，满足 low[y_i] >= dfn[x]。才为割点
+
+<hr>
+
+## 电力
+
+1. 统计连通块个数
+
+2. 枚举从哪个连通块删，删除哪个点
+
+当 dfn[x] <= low[y] 时，把 x 删掉子树会变多，特判一下是否为根节点。
+
+```
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 10010, M = 30010;
+
+int n, m;
+int h[N], e[M], ne[M], idx;
+int dfn[N], low[N], timestamp;
+int root, ans; 
+
+void add(int a, int b)
+{
+    e[idx] = b, ne[idx] = h[a], h[a] = idx ++;
+}
+
+void tarjan(int u)
+{
+    dfn[u] = low[u] = ++ timestamp;
+    
+    int cnt = 0;
+    for(int i = h[u]; i != -1; i = ne[i])
+    {
+        int j = e[i];
+        if(!dfn[j])
+        {
+            tarjan(j);
+            low[u] = min(low[u], low[j]);
+            if(low[j] >= dfn[u]) cnt ++;
+        }
+        else
+            low[u] = min(low[u], dfn[j]);
+    }
+    if(u != root && cnt) cnt ++;
+    
+    ans = max(ans, cnt);
+}
+
+int main()
+{
+    while(scanf("%d%d", &n, &m), n || m)
+    {
+        memset(dfn, 0, sizeof dfn);
+        memset(h, -1, sizeof h);
+        idx = 0, timestamp = 0;
+        
+        while(m --)
+        {
+            int a, b;
+            cin >> a >> b;
+            add(a, b), add(b, a);
+        }
+        
+        ans = 0;
+        int cnt = 0;
+        for(root = 0; root < n; root ++)
+            if(!dfn[root])
+            {
+                cnt ++;
+                tarjan(root);
+            }
+            
+        cout << ans + cnt - 1 << endl;
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
