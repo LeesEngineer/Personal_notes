@@ -42,9 +42,106 @@ v-dcc 引入割点，类比桥。v-dcc 是极大的不包含割点的连通块
 
 给定一个无向连通图，最少加几条边可以把它变成一个边双连通分量
 
-```
+求完所有 e-dcc 后，可以把所有 e-dcc 缩点，<b>缩完后所有边就都是桥了，会变成一棵树</b>。其内所有度数为 1 的点都要加一条边
+
+至少要加 (cnt + 1)/2 个边。
+
+<img width="416" height="420" alt="QQ_1793009228486" src="https://github.com/user-attachments/assets/d8f3f461-4a05-446c-870e-940828e9c692" />
+
+
 
 ```
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int N  = 5010, M = 20010;
+
+int n, m;
+int h[N], e[M], ne[M], idx;
+int dfn[N], low[N], timestamp;
+int stk[N], top;
+int id[N], dcc_cnt;
+bool is_bridge[M];
+int d[N];
+
+void tarjan(int u, int from)
+{
+    dfn[u] = low[u] = ++ timestamp;
+    stk[++ top] = u;
+    
+    for(int i = h[u]; i != -1;i = ne[i])
+    {
+        int j = e[i];
+        if(!dfn[j])
+        {
+            tarjan(j, i);
+            low[u] = min(low[u], low[j]);
+            if(dfn[u] < low[j])
+                is_bridge[i] = is_bridge[i ^ 1] = true;
+        }
+        else if(i != (from ^ 1))
+            low[u] = min(low[u], dfn[j]);
+    }
+    
+    if(dfn[u] == low[u])
+    {
+        int y;
+        ++ dcc_cnt;
+        do
+        {
+            y = stk[top --];
+            id[y] = dcc_cnt;
+        } while(y != u);
+    }
+}
+
+void add(int a, int b)
+{
+    e[idx] = b, ne[idx] = h[a], h[a] = idx ++;
+}
+
+int main()
+{
+    cin >> n >> m;
+    memset(h, -1, sizeof h);
+    while(m --)
+    {
+        int a, b;
+        cin >> a >> b;
+        add(a, b), add(b, a);
+    }
+    
+    tarjan(1, -1);
+    
+    for(int i = 0; i < idx; i ++)
+        if(is_bridge[i])
+            d[id[e[i]]] ++;
+            
+    int cnt = 0;
+    for(int i = 1; i <= dcc_cnt; i ++)
+        if(d[i] == 1)
+            cnt ++;
+    
+    cout << (cnt + 1) / 2;
+    
+    return 0;
+}
+```
+
+证明一下：在 e-dcc 中任意两点之间一定包含两条不相交的路径（没有公共边，可以在点上相交，不能在边上相交）
+
+1. 充分性：假设任意两点之间一定包含两条不相交的路径，如果不是双连通分量，就意味着图中至少有一个桥，去掉后左右两点就不连通了。矛盾
+
+2. 必要性：不想证
+
+<hr>
+
+对有向图来说，最少加 max{p, q} 个边将其变为强连通分量。p 和 q 分别表示出度为 1 的点和入度为 0 的点。
+
+对无向图来说，最少加 (cnt + 1)/2 个边将其变为边双连通分量。
 
 
 
