@@ -405,6 +405,8 @@ right.add += root.add; right.sum += (right.r - right.l + 1) * root.add
 root.add = 0;
 ```
 
+<p>懒标记是累加，而不是赋值</p>
+
 <p>修改的时候也要做这样的操作，避免分歧。当前的区间添加的标记不能再表示当前的区间的一个统一的标记了，操作完可能左边加十右边加十五</p>
 
 <p><b>在回溯时 pushup，在分裂传递懒标记时 pushdown</b></p>
