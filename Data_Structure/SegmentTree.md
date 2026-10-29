@@ -616,6 +616,120 @@ len 和 sum 是类似的，他不考虑祖先节点（只往下看）cnt 的前�
 
 这道题还需要做一下离散化
 
+<b>利用线段树存的不是点，而是区间。因为维护点没有意义，在扫描线求矩形面积并时，我们维护的不是坐标点本身，而是两个相邻坐标之间的长度。也就是区间的长度。</b>
+
+因为线段树维护的是：[ys[i],ys[i+1]]。所以对于原始范围 [y_1,y_2]，在线段树中对应的区间编号为：[find(y_1),find(y_2)-1]
+
+```
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int N = 100010;
+
+int n;
+struct Segment
+{
+    double x, y1, y2;
+    int k;
+    bool operator<(const Segment &t) const
+    {
+        return x < t.x;
+    }
+} seg[N << 1];
+
+struct Node
+{
+    int l, r;
+    int cnt;
+    double len;
+}tr[N << 3];
+
+vector<double> ys;
+
+int find(double y)
+{
+    return lower_bound(ys.begin(), ys.end(), y) - ys.begin();
+}
+
+void pushup(int u)
+{
+    if(tr[u].cnt) tr[u].len = (ys[tr[u].r + 1] - ys[tr[u].l]);
+    else if(tr[u].l != tr[u].r)
+    {
+        tr[u].len = tr[u << 1].len + tr[u << 1 | 1].len;
+    }
+    else
+        tr[u].len = 0;
+}
+
+void build(int u, int l, int r)
+{
+    tr[u] = {l, r, 0, 0};
+    if(l != r)
+    {
+        // pushup
+        int mid = l + r >> 1;
+        build(u << 1, l, mid), build(u << 1 | 1, mid + 1, r);
+    }
+}
+
+void modify(int u, int l, int r, int k)
+{
+    if(tr[u].l >= l && tr[u].r <= r)
+    {
+        tr[u].cnt += k;
+        pushup(u);
+    }
+    else
+    {
+        int mid = tr[u].l + tr[u].r >> 1;
+        if(l <= mid) modify(u << 1, l, r, k);
+        if(r > mid) modify(u << 1 | 1, l, r, k);
+        pushup(u);
+    }
+}
+
+int main()
+{
+    int T = 1;
+    while(scanf("%d", &n), n)
+    {
+        ys.clear();
+        for(int i = 0, j = 0; i < n; i ++)
+        {
+            double x1, y1, x2, y2;
+            scanf("%lf%lf%lf%lf", &x1, &y1, &x2, &y2);
+            seg[j ++] = {x1, y1, y2, 1};
+            seg[j ++] = {x2, y1, y2, -1};
+            ys.push_back(y1), ys.push_back(y2);
+        }
+        
+        sort(ys.begin(), ys.end());
+        ys.erase(unique(ys.begin(), ys.end()), ys.end());
+        
+        build(1, 0, ys.size() - 2);
+        
+        sort(seg, seg + n * 2);
+        
+        double res = 0;
+        for(int i = 0; i < n * 2; i ++)
+        {
+            if(i > 0) res += tr[1].len * (seg[i].x - seg[i - 1].x);
+            modify(1, find(seg[i].y1), find(seg[i].y2) - 1, seg[i].k);
+        }
+        
+        printf("Test case #%d\n", T ++);
+        printf("Total explored area: %.2lf\n\n", res);
+    }
+    
+    return 0;
+}
+```
 
 
 
