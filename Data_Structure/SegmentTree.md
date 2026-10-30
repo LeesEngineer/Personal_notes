@@ -731,8 +731,143 @@ int main()
 }
 ```
 
+<hr>
 
+# 维护序列
 
+<p>懒标记很复杂的一个应用</p>
+
+<p>考虑都需要记录那些信息：L R sum add mul。add 和 mul 有一个优先级的问题，乘法会影响之前的加法，而加法不会影响之前的乘法：</p>
+
+1. 先加再乘比较麻烦：x1 = (x + add1) * mul1
+
+<p>如果继续执行加法：x1 = (x + add1) * mul1 + c 。为了保持先加再乘的形式，必须写成：x2 = (x1 + add2) * mul1。</p>
+
+<p>那么 add2 = add1 + c / mul1。C 不一定被 mul1 整除</p>
+
+2. 所以用先乘再加，方便维护懒标记
+
+```
+x' = x * m + a
+x'' = (x * m + a) * mul + add
+x'' = x * (m * mul) + (a * mul) + add
+```
+
+写成一种操作就行：
+
+1. *c：令 d = 0 => x * c + d = x * c
+
+2. +d：令 c = 1 => x * c + d = x + d
+
+```
+#include <iostream>
+#include <algorithm>
+#define int long long
+
+using namespace std;
+
+const int N = 100010;
+
+int n, p, m;
+int w[N];
+struct Node
+{
+    int l, r;
+    int sum, add, mul;
+}tr[N << 2];
+
+void pushup(int u)
+{
+    tr[u].sum = (tr[u << 1].sum + tr[u << 1 | 1].sum) % p;
+}
+
+void pushdown(int u)
+{
+    auto &root = tr[u], &l = tr[u << 1], &r = tr[u << 1 | 1];
+    l.add = (l.add * root.mul + root.add) % p;
+    l.mul *= root.mul;
+    l.mul %= p;
+    l.sum = l.sum * root.mul + (l.r - l.l + 1) * root.add;
+    l.sum %= p;
+    
+    r.add = (r.add * root.mul + root.add) % p;
+    r.mul *= root.mul;
+    r.mul %= p;
+    r.sum = r.sum * root.mul + (r.r - r.l + 1) * root.add;
+    r.sum %= p;
+    
+    root.mul = 1, root.add = 0;
+}
+
+void build(int u, int l, int r)
+{
+    if(l == r)
+        tr[u] = {l, r, w[l] % p, 0, 1};
+    else
+    {
+        tr[u] = {l, r, 0, 0, 1};
+        int mid = l + r >> 1;
+        if(l <= mid) build(u << 1, l, mid);
+        if(r > mid) build(u << 1 | 1, mid + 1, r);
+        
+        pushup(u);
+    }
+}
+
+void modify(int u, int l, int r, int add, int mul)
+{
+    if(l <= tr[u].l && r >= tr[u].r)
+    {
+        tr[u].sum = (tr[u].sum * mul + (tr[u].r - tr[u].l + 1) * add) % p;
+        tr[u].add = (tr[u].add * mul + add) % p;
+        tr[u].mul *= mul;
+        tr[u].mul %= p;
+    }
+    else
+    {
+        pushdown(u);
+        int mid = tr[u].l + tr[u].r >> 1;
+        if(l <= mid) modify(u << 1, l, r, add, mul);
+        if(r > mid) modify(u << 1 | 1, l, r, add, mul);
+        pushup(u);
+    }
+}
+
+int query(int u, int l, int r)
+{
+    if(l <= tr[u].l && r >= tr[u].r)
+        return tr[u].sum;
+    
+    pushdown(u);
+    int mid = tr[u].l + tr[u].r >> 1;
+    int sum = 0;
+    if(l <= mid) sum += query(u << 1, l, r);
+    if(r > mid) sum += query(u << 1 | 1, l, r);
+    
+    return sum % p;
+}
+
+signed main()
+{
+    cin >> n >> p;
+    for(int i = 1; i <= n; i ++) cin >> w[i];
+    build(1, 1, n);
+    
+    cin >> m;
+    while(m --)
+    {
+        int op, l, r, add = 0, mul = 1;
+        cin >> op >> l >> r;
+        if(op == 1) cin >> mul;
+        else if(op == 2) cin >> add;
+        
+        if(op == 3) cout << query(1, l, r) << endl;
+        else modify(1, l, r, add, mul);
+    }
+    
+    return 0;
+}
+```
 
 
 
