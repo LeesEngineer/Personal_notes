@@ -120,9 +120,160 @@ int main()
 
 O(n)
 
+</br>
+
+## 欧拉定理
+
+如果 a 和 n 互质，则有 a^(phi(n)) 除以 n 的余数为 1
+
+费马小定理：如果 a 与 n 互质，并且 p 为质数，则有 a^(p - 1) 除以 p 的余数为 1
+
+</br>
+
+# 快速幂
+
+快速求出 a^k mod p，O(logk)
+
+1 <= a, p, k <= 1e9
+
+预处理出 a^(2^0) mod p, a^(2^1) mod p, a^(2^2) mod p, ..., a^(2^logk) mod p
+
+很好预处理，后一项就是前一项的平方。随后组合出 a^k
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+typedef long long ll;
+
+int qmi(int a, int k, int p)
+{
+    int res = 1;
+    while(k)
+    {
+        if(k & 1) res = (ll) res * a % p;
+        a = (ll) a * a % p;
+        k = k >> 1;
+    }
+    return res;
+}
+
+int main()
+{
+    int n;
+    scanf("%d", &n);
+    
+    while(n --)
+    {
+        int a, k, p;
+        scanf("%d%d%d", &a, &k, &p);
+        
+        cout << qmi(a, k, p) << endl;
+    }
+}
+```
+
+## 快速幂求逆元
+
+因为数论里面除法很麻烦，故找到 x 使得 a/b [同余] a*x (mod n)
+
+也就是给一个 b，找到 x 使得：b*x [同余] 1 (mod n)
+
+费马定理有：如果 b 与 p 互质，b^(p-1) 模 p 同余 1，则 b * b^(p-2) 模 p 同余 1
+
+故 b^(p-2) 就是 b 的逆元
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+typedef long long ll;
+
+int qmi(int a, int k, int p)
+{
+    int res = 1;
+    while(k)
+    {
+        if(k & 1) res = (ll) res * a % p;
+        a = (ll) a * a % p;
+        k = k >> 1;
+    }
+    return res;
+}
+
+int gcd(int a, int b)
+{
+    return b ? gcd(b, a % b) : a;
+}
+
+int main()
+{
+    int n;
+    scanf("%d", &n);
+    
+    while(n --)
+    {
+        int a, p;
+        scanf("%d%d", &a, &p);
+
+        if(gcd(a, p) != 1) cout << "impossible" << endl; // 如果题目保证 p 是质数，判断 a % p 是否为 0 （a 是否为 p 的倍数）即可
+        else cout << qmi(a, p - 2, p) << endl;
+    }
+}
+```
+
+</br>
+
+# 扩展欧几里得算法
+
+先说一下裴蜀定理：任意一对正整数a, b。一定存在整数 x 和 y 使得 ax + by = gcd(a, b)，并且是 a 和 b 能凑出来的最小的正整数
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int exgcd(int a, int b, int &x, int &y)
+{
+    if(!b)
+    {
+        x = 1, y = 0; // y=0只是一个解，a*1 + 0 * 0 = a
+        return a;
+    }
+    int d = exgcd(b, a % b, y, x); // 这里翻转一下，有 by + (a mod b)x = gcd(a, b)
+    
+    y -= a / b * x;
+    
+    return d;
+}
 
 
+int main()
+{
+    int n;
+    cin >> n;
+    while(n --)
+    {
+        int a, b, x, y;
+        cin >> a >> b;
+        
+        exgcd(a, b, x, y);
+        
+        cout << x << " " << y << endl;
+    }
+}
+```
 
+```
+by + (a % b)x = d
+by + (a - (a//b)b)x = d
+ax + b(y - (a//b)x) = d
+```
 
 
 
