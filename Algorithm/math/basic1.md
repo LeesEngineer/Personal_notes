@@ -275,6 +275,57 @@ by + (a - (a//b)b)x = d
 ax + b(y - (a//b)x) = d
 ```
 
+</br>
+
+## 线形同余方程
+
+给定 n 组数据 ai,bi,mi，对于每组数求出一个 xi，使其满足 ai×xi≡bi(modmi)，如果无解则输出 impossible。
+
+解有很多个，转化成 ax 除以 m 的余数是 b
+
+等价于：存在整数 y 使得 ax = my + b 成立，即 ax + my' = b
+
+方程式成立的充分必要条件是：gcd(a, m) | b
+
+```
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int exgcd(int a, int b, int &x, int &y)
+{
+    if(!b)
+    {
+        x = 1, y = 0;
+        return a;
+    }
+    int d = exgcd(b, a % b, y, x);
+    
+    y -= a / b * x;
+    
+    return d;
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+    while(n --)
+    {
+        int a, b, m;
+        cin >> a >> b >> m;
+        
+        int x, y;
+        int d = exgcd(a, m, x, y);
+        if(b % d) cout << "impossible\n";
+        else cout << ((long long) x * (b / d)) % m << endl;
+    }
+}
+```
+
+
+
 
 
 
