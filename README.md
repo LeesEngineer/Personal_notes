@@ -226,6 +226,66 @@ register() {
 }
 ```
 
+</br>
+
+# 模板方法设计模式
+
+在父类中定义一个算法的执行流程，将其中某些具体步骤交给子类实现。
+
+<img width="2264" height="930" alt="QQ_2026-11-23_10-17-26" src="https://github.com/user-attachments/assets/0214b6ce-c495-4c30-b97d-0e57a83e5064" />
+
+```
+abstract class Beverage {
+
+    // 模板方法：规定制作饮料的流程
+    public final void prepare() {
+        boilWater();
+        brew();
+        pourInCup();
+        addCondiments();
+    }
+
+    // 公共步骤
+    void boilWater() {
+        System.out.println("烧开水");
+    }
+
+    void pourInCup() {
+        System.out.println("倒入杯中");
+    }
+
+    // 不同的步骤交给子类实现
+    abstract void brew();
+
+    abstract void addCondiments();
+}
+
+class Coffee extends Beverage {
+
+    @Override
+    void brew() {
+        System.out.println("冲泡咖啡");
+    }
+
+    @Override
+    void addCondiments() {
+        System.out.println("加入牛奶和糖");
+    }
+}
+
+class Tea extends Beverage {
+
+    @Override
+    void brew() {
+        System.out.println("浸泡茶叶");
+    }
+
+    @Override
+    void addCondiments() {
+        System.out.println("加入柠檬");
+    }
+}
+```
 
 
 
