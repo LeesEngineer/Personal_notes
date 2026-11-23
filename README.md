@@ -1,4 +1,4 @@
-<img width="2316" height="1046" alt="QQ_2026-11-23_10-20-18" src="https://github.com/user-attachments/assets/80a7ee61-d85a-40e8-abe1-e9bed47e26c3" /># 观察者模式
+# 观察者模式
 
 观察者模式包含两个主要角色：
 
