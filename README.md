@@ -88,7 +88,143 @@ public class Main {
 }
 ```
 
+<img width="2340" height="1218" alt="QQ_2026-11-23_09-54-19" src="https://github.com/user-attachments/assets/a42fa4fe-5507-4ee9-b9d9-d10fe1c6ef67" />
 
+<img width="2244" height="1030" alt="QQ_2026-11-23_10-08-35" src="https://github.com/user-attachments/assets/b4df8167-a468-46ac-ba8e-c871f54e7087" />
+
+<img width="2174" height="870" alt="QQ_2026-11-23_10-08-57" src="https://github.com/user-attachments/assets/8070c7b3-1aa9-43e3-8017-89e2a3e1e22d" />
+
+```
+public interface RegObserver {
+    void handleRegSuccess(long userId);
+}
+
+=======================================================
+
+public class RegPromotion implements RegObserver {
+
+    private PromotionService promotionService;
+
+    @Override
+    public void handleRegSuccess(long userId) {
+        promotionService.issueNewUserExperienceCash(userId);
+    }
+}
+
+=======================================================
+
+public class CouponObserver implements RegObserver {
+
+    private CouponService couponService;
+
+    @Override
+    public void handleRegSuccess(long userId) {
+        couponService.issueCoupon(userId);
+    }
+}
+
+=======================================================
+
+public class RegNotification implements RegObserver {
+
+    private NotificationService notificationService;
+
+    @Override
+    public void handleRegSuccess(long userId) {
+        notificationService.sendInboxMessage(userId);
+    }
+}
+
+=======================================================
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class UserService {
+
+    private List<RegObserver> observers = new ArrayList<>();
+
+    // 添加观察者
+    public void addObserver(RegObserver observer) {
+        observers.add(observer);
+    }
+
+    // 删除观察者
+    public void removeObserver(RegObserver observer) {
+        observers.remove(observer);
+    }
+
+    // 通知所有观察者
+    private void notifyObservers(long userId) {
+        for (RegObserver observer : observers) {
+            observer.handleRegSuccess(userId);
+        }
+    }
+
+    public long register(String telephone, String password) {
+        // 执行用户注册逻辑，得到 userId
+        long userId = saveUser(telephone, password);
+
+        // 注册成功后通知所有观察者
+        notifyObservers(userId);
+
+        return userId;
+    }
+
+    // 示意方法：具体注册持久化逻辑由原系统实现
+    private long saveUser(String telephone, String password) {
+        // 校验、加密密码、保存用户等
+        throw new UnsupportedOperationException("待实现注册逻辑");
+    }
+}
+
+=======================================================
+
+public class UserController {
+
+    private UserService userService;
+
+    public Long register(String telephone, String password) {
+
+        return userService.register(telephone, password);
+    }
+}
+
+=======================================================
+
+UserService userService = new UserService();
+
+userService.addObserver(new RegPromotion());
+userService.addObserver(new CouponObserver());
+userService.addObserver(new RegNotification());
+
+=======================================================
+
+//假设以后需要增加积分奖励，只需要定义一个新的观察者：
+public class PointsObserver implements RegObserver {
+
+    @Override
+    public void handleRegSuccess(long userId) {
+        System.out.println("给用户发放积分：" + userId);
+    }
+}
+
+userService.addObserver(new PointsObserver());
+```
+
+```
+register() {
+    注册();
+    发放体验金();
+    发放优惠券();
+    发送消息();
+}
+变成
+register() {
+    注册();
+    notifyObservers();
+}
+```
 
 
 
