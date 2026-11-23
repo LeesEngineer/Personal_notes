@@ -1,4 +1,4 @@
-# 观察者模式
+<img width="2316" height="1046" alt="QQ_2026-11-23_10-20-18" src="https://github.com/user-attachments/assets/80a7ee61-d85a-40e8-abe1-e9bed47e26c3" /># 观察者模式
 
 观察者模式包含两个主要角色：
 
@@ -287,19 +287,93 @@ class Tea extends Beverage {
 }
 ```
 
-<img width="2264" height="930" alt="QQ_2026-11-23_10-17-26" src="https://github.com/user-attachments/assets/0214b6ce-c495-4c30-b97d-0e57a83e5064" />
+</br>
 
+# 策略模式
 
+定义一系列算法，将每个算法封装成独立的类，使它们可以相互替换。（把不同的处理方式封装起来，程序可以根据需要选择使用哪一种。）
 
+```
+public interface PayStrategy {
+    void pay(double money);
+}
+```
 
+```
+public class AliPay implements PayStrategy {
 
+    @Override
+    public void pay(double money) {
+        System.out.println("支付宝支付：" + money);
+    }
+}
+```
 
+```
+public class WeChatPay implements PayStrategy {
 
+    @Override
+    public void pay(double money) {
+        System.out.println("微信支付：" + money);
+    }
+}
+```
 
+```
+public class BankPay implements PayStrategy {
 
+    @Override
+    public void pay(double money) {
+        System.out.println("银行卡支付：" + money);
+    }
+}
+```
 
+```
+public class PaymentContext {
 
+    private PayStrategy strategy;
 
+    // 构造方法注入策略
+    public PaymentContext(PayStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    // 动态切换策略
+    public void setStrategy(PayStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public void pay(double money) {
+        strategy.pay(money);
+    }
+}
+```
+
+```
+public class Main {
+
+    public static void main(String[] args) {
+
+        PaymentContext context =
+                new PaymentContext(new AliPay());
+
+        context.pay(100);
+
+        // 切换为微信支付
+        context.setStrategy(new WeChatPay());
+        context.pay(200);
+
+        // 切换为银行卡支付
+        context.setStrategy(new BankPay());
+        context.pay(300);
+    }
+}
+```
+
+<img width="2276" height="1038" alt="QQ_2026-11-23_10-31-31" src="https://github.com/user-attachments/assets/259306ff-e162-4018-a651-97d4ac3857ec" />
+
+<img width="2344" height="424" alt="QQ_2026-11-23_10-34-24" src="https://github.com/user-attachments/assets/9a26fc76-0169-4d3c-b8ba-319e8d3141d1" />
 
 
 
