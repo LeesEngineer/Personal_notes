@@ -287,6 +287,9 @@ class Tea extends Beverage {
 }
 ```
 
+<img width="2264" height="930" alt="QQ_2026-11-23_10-17-26" src="https://github.com/user-attachments/assets/0214b6ce-c495-4c30-b97d-0e57a83e5064" />
+
+
 
 
 
