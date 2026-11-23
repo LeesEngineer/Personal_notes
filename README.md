@@ -477,14 +477,99 @@ public class Main {
 
 责任链模式：沿着链传递，让处理者决定谁来做。
 
+</br>
 
+# 中介者模式
 
+通过引入一个中介者对象，封装多个对象之间的交互，使这些对象不需要直接相互引用，从而降低对象之间的耦合。
 
+<img width="708" height="1304" alt="QQ_2026-11-23_10-49-14" src="https://github.com/user-attachments/assets/95fdd95b-042c-4706-971f-711268103579" />
 
+```
+interface Mediator {
+    void sendMessage(String message, Colleague sender);
+}
+```
 
+```
+abstract class Colleague {
 
+    protected Mediator mediator;
 
+    public Colleague(Mediator mediator) {
+        this.mediator = mediator;
+    }
 
+    public abstract void send(String message);
+
+    public abstract void receive(String message);
+}
+```
+
+```
+class User extends Colleague {
+
+    private String name;
+
+    public User(String name, Mediator mediator) {
+        super(mediator);
+        this.name = name;
+    }
+
+    @Override
+    public void send(String message) {
+        System.out.println(name + "发送：" + message);
+        mediator.sendMessage(message, this);
+    }
+
+    @Override
+    public void receive(String message) {
+        System.out.println(name + "收到：" + message);
+    }
+}
+```
+
+```
+import java.util.ArrayList;
+import java.util.List;
+
+class ChatRoom implements Mediator {
+
+    private List<Colleague> users = new ArrayList<>();
+
+    public void addUser(Colleague user) {
+        users.add(user);
+    }
+
+    @Override
+    public void sendMessage(String message, Colleague sender) {
+        for (Colleague user : users) {
+            if (user != sender) {
+                user.receive(message);
+            }
+        }
+    }
+}
+```
+
+```
+public class Main {
+    public static void main(String[] args) {
+
+        ChatRoom chatRoom = new ChatRoom();
+
+        User user1 = new User("张三", chatRoom);
+        User user2 = new User("李四", chatRoom);
+        User user3 = new User("王五", chatRoom);
+
+        chatRoom.addUser(user1);
+        chatRoom.addUser(user2);
+        chatRoom.addUser(user3);
+
+        user1.send("大家好！");
+    }
+}s
+```
 
 
 
