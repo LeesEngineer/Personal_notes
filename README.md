@@ -375,12 +375,107 @@ public class Main {
 
 <img width="2344" height="424" alt="QQ_2026-11-23_10-34-24" src="https://github.com/user-attachments/assets/9a26fc76-0169-4d3c-b8ba-319e8d3141d1" />
 
+# 责任链设计模式
 
+将多个处理者连接成一条链，请求沿着这条链传递，由链上的处理者决定是否处理该请求，以及是否继续传递。（一个请求经过多个处理者，每个处理者负责自己的部分。）
 
+假设公司有一个请假审批系统：
 
+- 请假 1 天以内：组长审批。
 
+- 请假 3 天以内：经理审批。
 
+- 请假超过 3 天：总经理审批。
 
+责任链模式主要包含两个角色：
+
+- Handler 定义处理请求的方法，并保存下一个处理者
+
+- ConcreteHandler 判断自己能否处理请求，不能处理则传递
+
+<img width="1558" height="648" alt="QQ_2026-11-23_10-38-53" src="https://github.com/user-attachments/assets/233997ae-f084-4706-8d4b-a7afef6e93e9" />
+
+```
+abstract class Handler {
+
+    protected Handler next;
+
+    // 设置下一个处理者
+    public Handler setNext(Handler next) {
+        this.next = next;
+        return next;
+    }
+
+    // 处理请求
+    public abstract void handleRequest(int days);
+}
+```
+
+```
+class TeamLeader extends Handler {
+
+    @Override
+    public void handleRequest(int days) {
+        if (days <= 1) {
+            System.out.println("组长批准请假");
+        } else if (next != null) {
+            next.handleRequest(days);
+        }
+    }
+}
+```
+
+```
+class Manager extends Handler {
+
+    @Override
+    public void handleRequest(int days) {
+        if (days <= 3) {
+            System.out.println("经理批准请假");
+        } else if (next != null) {
+            next.handleRequest(days);
+        }
+    }
+}
+```
+
+```
+class GeneralManager extends Handler {
+
+    @Override
+    public void handleRequest(int days) {
+        if (days > 0) {
+            System.out.println("总经理批准请假");
+        } else {
+            System.out.println("请假天数不合法");
+        }
+    }
+}
+```
+
+```
+public class Main {
+
+    public static void main(String[] args) {
+
+        Handler leader = new TeamLeader();
+        Handler manager = new Manager();
+        Handler boss = new GeneralManager();
+
+        // 构建责任链
+        leader.setNext(manager).setNext(boss);
+
+        // 提交请求
+        leader.handleRequest(1);
+        leader.handleRequest(2);
+        leader.handleRequest(5);
+    }
+}
+```
+
+策略模式：选择谁来做。
+
+责任链模式：沿着链传递，让处理者决定谁来做。
 
 
 
